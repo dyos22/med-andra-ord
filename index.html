@@ -919,14 +919,12 @@
   </div>
   <div class="card" id="joinCard" style="text-align:center;padding:14px 16px">
     <div style="font-size:0.75rem;color:var(--ink-soft);margin-bottom:8px">Har du en rumskod?</div>
-    <div style="display:flex;gap:8px">
-      <input type="text" id="roomCodeInput" placeholder="XXXXX" maxlength="5"
-        style="flex:1;letter-spacing:0.15em;font-size:1.2rem;text-align:center"
-        autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="characters"
-        oninput="this.value=this.value.toUpperCase()"
-        onkeydown="if(event.key==='Enter')joinByCode()">
-      <button class="btn-primary" style="flex:none;padding:0 18px" onclick="joinByCode()">Anslut</button>
-    </div>
+    <input type="text" id="roomCodeInput" placeholder="XXXXX" maxlength="5"
+      style="letter-spacing:0.15em;font-size:1.4rem;text-align:center;margin-bottom:8px"
+      autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="characters"
+      oninput="this.value=this.value.toUpperCase()"
+      onkeydown="if(event.key==='Enter')joinByCode()">
+    <button class="btn-primary" style="width:100%" onclick="joinByCode()">Anslut</button>
     <div id="joinError" style="display:none;color:var(--hard);font-size:0.8rem;margin-top:8px"></div>
   </div>
   <button class="btn-secondary" id="newGameBtn" onclick="clickNewGame()">Skapa nytt spel</button>
