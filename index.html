@@ -917,7 +917,18 @@
     <div id="loginBtns" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px"></div>
     <div id="loginError" style="display:none;color:var(--hard);font-size:0.85rem;text-align:center;margin-top:10px;font-weight:600"></div>
   </div>
-  <button class="btn-primary" id="newGameBtn" onclick="clickNewGame()">Skapa nytt spel</button>
+  <div class="card" id="joinCard" style="text-align:center;padding:14px 16px">
+    <div style="font-size:0.75rem;color:var(--ink-soft);margin-bottom:8px">Har du en rumskod?</div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="roomCodeInput" placeholder="XXXXX" maxlength="5"
+        style="flex:1;text-transform:uppercase;letter-spacing:0.15em;font-family:var(--font-title);font-size:1.1rem;text-align:center"
+        oninput="this.value=this.value.toUpperCase()"
+        onkeydown="if(event.key==='Enter')joinByCode()">
+      <button class="btn-primary" style="flex:none;padding:0 18px" onclick="joinByCode()">Anslut</button>
+    </div>
+    <div id="joinError" style="display:none;color:var(--hard);font-size:0.8rem;margin-top:8px"></div>
+  </div>
+  <button class="btn-secondary" id="newGameBtn" onclick="clickNewGame()">Skapa nytt spel</button>
   <div style="text-align:center;color:var(--text-muted);font-size:0.8rem;margin-top:4px" id="connectingMsg">Ansluter...</div>
 </div>
 
@@ -927,6 +938,11 @@
   <div class="player-header">
     <div class="turn-label" id="waitTurnLabel"></div>
     <div class="player-name" id="waitPlayerName">—</div>
+  </div>
+  <div class="card" id="roomCodeCard" style="display:none;text-align:center;padding:14px 16px">
+    <div style="font-size:0.75rem;color:var(--ink-soft);margin-bottom:6px" id="roomCodeLabel">Dela länken med de andra spelarna</div>
+    <div style="font-family:var(--font-title);font-size:2rem;letter-spacing:0.12em;color:var(--ink);margin-bottom:10px" id="roomCodeDisplay"></div>
+    <button class="btn-secondary" style="width:100%" onclick="copyRoomLink()" id="copyLinkBtn">Kopiera länk</button>
   </div>
   <div class="game-actions" id="waitActions"></div>
 </div>
@@ -2624,6 +2640,8 @@ function mpShowLogin(sv) {
   const card = document.getElementById('loginCard');
   const btns = document.getElementById('loginBtns');
   document.getElementById('connectingMsg').style.display = 'none';
+  // Hide the manual code-entry card once we're already in a room
+  document.getElementById('joinCard').style.display = MP.roomCode ? 'none' : '';
   if (sv.players && sv.players.length) {
     card.style.display = '';
     btns.innerHTML = '';
@@ -2658,6 +2676,32 @@ function mpShowLogin(sv) {
   showScreen('loginScreen');
 }
 
+function copyRoomLink() {
+  const url = location.href.split('?')[0] + '?room=' + MP.roomCode;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('copyLinkBtn');
+    btn.textContent = 'Kopierad!';
+    setTimeout(() => { btn.textContent = 'Kopiera länk'; }, 2000);
+  });
+}
+
+async function joinByCode() {
+  const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+  const err  = document.getElementById('joinError');
+  if (code.length < 3) { err.textContent = 'Ange rumskoden'; err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  mpSetRoom(code, true);
+  const sv = await mpLoadRoom();
+  if (!sv || !sv.players || !sv.players.length) {
+    mpSetRoom(null, true);
+    err.textContent = 'Hittade inget rum med den koden';
+    err.style.display = 'block';
+    return;
+  }
+  MP.lastVer = -1;
+  mpHandle(sv);
+}
+
 function clickNewGame() {
   MP.myName = null;
   sessionStorage.removeItem('mao_mp_player');
@@ -2683,6 +2727,16 @@ function mpScoreBand(id, sv) {
 function mpShowWaiting(sv, isActive) {
   mpScoreBand('waitScoreBand', sv);
   const l = sv.lang || 'sv';
+  const codeCard = document.getElementById('roomCodeCard');
+  if (MP.roomCode) {
+    document.getElementById('roomCodeDisplay').textContent = MP.roomCode;
+    document.getElementById('roomCodeLabel').textContent =
+      l === 'sv' ? 'Dela länken med de andra spelarna' : 'Share this link with the other players';
+    document.getElementById('copyLinkBtn').textContent = l === 'sv' ? 'Kopiera länk' : 'Copy link';
+    codeCard.style.display = '';
+  } else {
+    codeCard.style.display = 'none';
+  }
   const cur = sv.players[sv.idx];
   document.getElementById('waitTurnLabel').textContent = isActive
     ? (l === 'sv' ? 'Det är din tur' : "It's your turn")
