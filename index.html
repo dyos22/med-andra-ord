@@ -154,7 +154,7 @@
     .settings-card { padding-bottom: 16px; }
     .settings-grid {
       display: grid;
-      grid-template-columns: 76px minmax(112px, 1fr) minmax(132px, 1.25fr);
+      grid-template-columns: 76px minmax(0, 1fr) minmax(0, 1fr);
       gap: 10px;
       align-items: stretch;
     }
@@ -170,6 +170,7 @@
       border: 0;
     }
     .setting-pill {
+      min-width: 0;
       min-height: 48px;
       border: 2px solid var(--ink);
       border-radius: 14px;
@@ -186,6 +187,7 @@
       font-size: 1rem;
       color: var(--ink);
       white-space: nowrap;
+      min-width: 0;
     }
     .lang-toggle {
       gap: 6px;
@@ -238,8 +240,8 @@
       color: var(--ink-soft);
       letter-spacing: 0;
     }
-    @media (max-width: 390px) {
-      .settings-grid { grid-template-columns: 76px 1fr; }
+    @media (max-width: 430px) {
+      .settings-grid { grid-template-columns: 76px minmax(0, 1fr); }
       .timer-setting { grid-column: 1 / -1; }
     }
 
@@ -845,15 +847,7 @@
     <button class="btn-add" id="addPlayerBtn" onclick="addPlayer()">+ Lägg till gäst</button>
   </div>
 
-  <!-- Advanced -->
-  <details>
-    <summary id="advSummary">Avancerade inställningar (Claude API)</summary>
-    <div class="card adv-inner">
-      <div class="card-label" id="lblApiKey">Claude API-nyckel (valfritt)</div>
-      <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
-      <p id="apiKeyHelp">Om du klistrar in en API-nyckel hämtas nya ord automatiskt från Claude när den inbyggda listan börjar ta slut. Nyckeln sparas bara i din webbläsare.</p>
-    </div>
-  </details>
+  <input type="hidden" id="apiKey" autocomplete="off">
 
   <button class="btn-primary" onclick="startGame()" id="startBtn">Starta spelet!</button>
   <div class="stats-link" id="statsLink" onclick="showStats()">titta på statistik</div>
@@ -1974,7 +1968,7 @@ const FAMILY_ROOM = 'FAMILY';
 const PRESET_PLAYERS = ['John', 'Yasmin', 'Alva'];
 
 let playerSeq = 0;
-const presetActive = Object.fromEntries(PRESET_PLAYERS.map(n => [n, true]));
+const presetActive = Object.fromEntries(PRESET_PLAYERS.map(n => [n, false]));
 
 function renderPresets() {
   const wrap = document.getElementById('presetPlayers');
@@ -2075,9 +2069,6 @@ function applyLangUI() {
   document.getElementById('lblBarnMode').textContent   = t.lblBarnMode;
   document.getElementById('addPlayerBtn').textContent = t.addBtn;
   document.getElementById('lblSek').textContent     = t.lblSek;
-  document.getElementById('advSummary').textContent = t.advSummary;
-  document.getElementById('lblApiKey').textContent  = t.lblApiKey;
-  document.getElementById('apiKeyHelp').textContent = t.apiHelp;
   document.getElementById('startBtn').textContent   = t.startBtn;
   document.getElementById('statsLink').textContent  = t.statsLink;
   document.getElementById('statsTitle').textContent = t.statsTitle;
@@ -2099,7 +2090,10 @@ function startGame() {
     const v = row.querySelector('input').value.trim();
     if (v) players.push(v);
   });
-  if (!players.length) players.push(...PRESET_PLAYERS);
+  if (!players.length) {
+    toast(S.lang === 'sv' ? 'Välj minst en spelare' : 'Choose at least one player');
+    return;
+  }
   S.timerOn  = document.getElementById('timerToggle').checked;
   S.timerDur = Math.max(5, parseInt(document.getElementById('timerSeconds').value) || 60);
   S.apiKey   = document.getElementById('apiKey').value.trim();
