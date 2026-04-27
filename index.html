@@ -712,6 +712,65 @@
       color: var(--ink-soft); font-size: 1rem; margin-bottom: 18px;
       font-family: var(--font-marker);
     }
+    .stats-tabs {
+      display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px;
+      margin-bottom: 12px;
+    }
+    .stats-tab {
+      flex: 0 0 auto; border: 2px solid var(--ink); border-radius: 999px;
+      padding: 7px 12px; background: var(--paper); color: var(--ink);
+      box-shadow: 2px 2px 0 var(--ink); font-family: var(--font-marker);
+      font-size: 1rem; cursor: pointer;
+    }
+    .stats-tab.active {
+      background: var(--yellow); transform: rotate(-1deg);
+    }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px; margin-bottom: 14px;
+    }
+    .stat-card {
+      border: 2px solid var(--ink); border-radius: 14px;
+      background: var(--paper-deep); padding: 12px;
+      box-shadow: 2px 3px 0 var(--ink); min-width: 0;
+    }
+    .stat-card.wide { grid-column: 1 / -1; }
+    .stat-kicker {
+      font-family: var(--font-marker); color: var(--ink-soft);
+      font-size: 0.85rem; margin-bottom: 4px;
+    }
+    .stat-big {
+      font-family: var(--font-title); font-size: 1.8rem;
+      line-height: 1; color: var(--ink);
+    }
+    .stat-sub {
+      font-family: var(--font-marker); color: var(--ink-soft);
+      font-size: 0.95rem; margin-top: 4px;
+    }
+    .stat-section-title {
+      font-family: var(--font-script); font-size: 1.45rem; color: var(--blue);
+      margin: 16px 0 8px; font-weight: 700;
+    }
+    .stat-bars { display: flex; flex-direction: column; gap: 8px; }
+    .stat-bar-row {
+      display: grid; grid-template-columns: minmax(80px, 1fr) 1.4fr auto;
+      gap: 8px; align-items: center; font-family: var(--font-marker);
+      font-size: 0.95rem;
+    }
+    .stat-bar-track {
+      height: 12px; border: 2px solid var(--ink); border-radius: 999px;
+      background: var(--paper); overflow: hidden;
+    }
+    .stat-bar-fill { display: block; height: 100%; background: var(--green); }
+    .stat-bar-fill.weak { background: var(--pink); }
+    .stat-pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .stat-pill {
+      border: 2px solid var(--ink); border-radius: 999px;
+      padding: 5px 10px; background: var(--paper);
+      font-family: var(--font-marker); font-size: 0.95rem;
+    }
+    .stat-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    .stat-actions .btn-secondary { flex: 1; min-width: 160px; }
 
     /* SCORE NOTIF */
     .score-notif {
@@ -893,8 +952,10 @@
       <button class="btn-icon" onclick="closeStats()">×</button>
     </div>
     <p class="stat-meta" id="statsMeta"></p>
+    <div id="statsTabs" class="stats-tabs"></div>
     <div id="statsContent"></div>
-    <div style="margin-top:16px">
+    <div class="stat-actions">
+      <button class="btn-secondary" onclick="pruneGuestStats()">Rensa äldre gäster</button>
       <button class="btn-secondary" onclick="clearStats()">Nollställ statistik</button>
     </div>
   </div>
@@ -1813,6 +1874,95 @@ function incRounds(lang) {
   localStorage.setItem(`mao_rounds_${lang}`, getTotalRounds(lang) + 1);
 }
 
+const RICH_STATS_KEY = 'mao_rich_stats_v1';
+const FAMILY_PLAYERS = ['John', 'Yasmin', 'Alva'];
+let statsSelectedPlayer = 'Alla';
+
+function emptyPlayerStats() {
+  return {
+    rounds: 0, points: 0, right: 0, passes: 0,
+    totalExplainMs: 0, fastestMs: null, fastestWord: '',
+    byTheme: {}, byDiff: {}, passWords: {},
+  };
+}
+
+function getRichStats() {
+  try {
+    const stats = JSON.parse(localStorage.getItem(RICH_STATS_KEY) || '{}');
+    return { players: {}, guests: [], ...stats };
+  } catch {
+    return { players: {}, guests: [] };
+  }
+}
+
+function saveRichStats(stats) {
+  try { localStorage.setItem(RICH_STATS_KEY, JSON.stringify(stats)); } catch {}
+}
+
+function ensurePlayerStats(stats, player) {
+  if (!stats.players[player]) stats.players[player] = emptyPlayerStats();
+  return stats.players[player];
+}
+
+function noteGuestPlayer(stats, player) {
+  if (FAMILY_PLAYERS.includes(player)) return;
+  const guests = (stats.guests || []).filter(g => g.name !== player);
+  guests.unshift({ name: player, lastSeen: Date.now() });
+  stats.guests = guests.slice(0, 12);
+}
+
+function logRoundStats(player, points) {
+  const stats = getRichStats();
+  const ps = ensurePlayerStats(stats, player);
+  ps.rounds++;
+  ps.points += points;
+  noteGuestPlayer(stats, player);
+  saveRichStats(stats);
+}
+
+function logWordStat({ player, word, status, diff, theme, explainMs }) {
+  if (!player || !word || word === EXHAUSTED) return;
+  const stats = getRichStats();
+  const ps = ensurePlayerStats(stats, player);
+  const bucket = ps.byTheme[theme] || (ps.byTheme[theme] = { right: 0, passes: 0, totalExplainMs: 0 });
+  const diffBucket = ps.byDiff[diff] || (ps.byDiff[diff] = { right: 0, passes: 0, totalExplainMs: 0 });
+
+  if (status === 'right') {
+    ps.right++;
+    bucket.right++;
+    diffBucket.right++;
+    if (explainMs) {
+      ps.totalExplainMs += explainMs;
+      bucket.totalExplainMs += explainMs;
+      diffBucket.totalExplainMs += explainMs;
+      if (!ps.fastestMs || explainMs < ps.fastestMs) {
+        ps.fastestMs = explainMs;
+        ps.fastestWord = word;
+      }
+    }
+  } else if (status === 'pass') {
+    ps.passes++;
+    bucket.passes++;
+    diffBucket.passes++;
+    ps.passWords[word] = (ps.passWords[word] || 0) + 1;
+  }
+
+  noteGuestPlayer(stats, player);
+  saveRichStats(stats);
+}
+
+function pruneGuestStats() {
+  const stats = getRichStats();
+  const keepGuests = (stats.guests || []).slice(0, 4).map(g => g.name);
+  Object.keys(stats.players || {}).forEach(name => {
+    if (!FAMILY_PLAYERS.includes(name) && !keepGuests.includes(name)) delete stats.players[name];
+  });
+  stats.guests = (stats.guests || []).slice(0, 4);
+  saveRichStats(stats);
+  showStats();
+  toast('Äldre gäster rensade');
+}
+
 // ═══════════════════════════════════════════
 //  SESSION SAVE / RESUME
 // ═══════════════════════════════════════════
@@ -2165,7 +2315,7 @@ function renderRound() {
   const diffs = S.barnMode ? ['barn','barn','barn'] : DIFFS;
   diffs.forEach((diff, i) => {
     const word = pickWord(S.lang, S.theme, diff);
-    S.currentCards.push({ diff, word, status: null });
+    S.currentCards.push({ diff, word, status: null, theme: S.theme, revealedAt: null });
     container.appendChild(buildCard(i, diff, word));
   });
 
@@ -2221,6 +2371,7 @@ function buildCard(idx, diff, word) {
   card.querySelector('.word-hint').addEventListener('click', () => {
     if (card.classList.contains('revealed')) return;
     card.classList.add('revealed','pop');
+    S.currentCards[idx].revealedAt = Date.now();
     setTimeout(() => card.classList.remove('pop'), 300);
   });
 
@@ -2235,6 +2386,8 @@ function markCard(idx, status) {
   const t = UI[S.lang];
   const pts = PTS[c.diff] || 1;
   if (status === 'right') {
+    const explainMs = c.revealedAt ? Math.max(0, Date.now() - c.revealedAt) : null;
+    logWordStat({ player: S.players[S.idx], word: c.word, status: 'right', diff: c.diff, theme: c.theme, explainMs });
     card.classList.add('scored-right');
     card.querySelector('.scored-label').textContent = t.scoredRight + ` +${pts}p`;
     S.roundPts += pts;
@@ -2249,17 +2402,23 @@ function markCard(idx, status) {
 function passCard(idx) {
   const c = S.currentCards[idx];
   if (!c || c.status) return;
-  if (c.word !== EXHAUSTED) logPassStat(S.lang, c.word);
+  if (c.word !== EXHAUSTED) {
+    logPassStat(S.lang, c.word);
+    logWordStat({ player: S.players[S.idx], word: c.word, status: 'pass', diff: c.diff, theme: c.theme });
+  }
   const newWord = pickWord(S.lang, S.theme, c.diff);
   if (newWord === EXHAUSTED && c.word === EXHAUSTED) {
     toast(S.lang === 'sv' ? 'Inga fler ord tillgängliga!' : 'No more words available!');
     return;
   }
-  c.word = newWord; c.status = null;
+  c.word = newWord; c.status = null; c.theme = S.theme; c.revealedAt = null;
   if (newWord !== EXHAUSTED) S.roundPts = Math.max(0, S.roundPts - 1);
   const old = document.getElementById(`card_${idx}`);
   const newCard = buildCard(idx, c.diff, newWord);
-  if (newWord !== EXHAUSTED) newCard.classList.add('revealed');
+  if (newWord !== EXHAUSTED) {
+    newCard.classList.add('revealed');
+    c.revealedAt = Date.now();
+  }
   old.replaceWith(newCard);
   renderScoreBand();
 }
@@ -2274,6 +2433,7 @@ function endRound() {
   S.scores[player] = (S.scores[player] || 0) + pts;
   S.round++;
   incRounds(S.lang);
+  logRoundStats(player, pts);
   saveSession();
   mpPost('end_round', { round_pts: pts });
   showRoundModal();
@@ -2346,20 +2506,137 @@ function onTimeUp() {
 // ═══════════════════════════════════════════
 //  STATS OVERLAY
 // ═══════════════════════════════════════════
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+}
+
+function fmtMs(ms) {
+  if (!ms) return '–';
+  return `${(ms / 1000).toFixed(ms < 10000 ? 1 : 0)}s`;
+}
+
+function pct(part, total) {
+  return total ? Math.round((part / total) * 100) : 0;
+}
+
+function themeName(key) {
+  const themes = S.lang === 'sv' ? THEMES_SV : THEMES_EN;
+  return themes.find(t => t.key === key)?.label.replace(/\s+[^\s]+$/, '') || key;
+}
+
+function mergePlayerStats(names, rich) {
+  const merged = emptyPlayerStats();
+  names.forEach(name => {
+    const ps = rich.players[name];
+    if (!ps) return;
+    merged.rounds += ps.rounds || 0;
+    merged.points += ps.points || 0;
+    merged.right += ps.right || 0;
+    merged.passes += ps.passes || 0;
+    merged.totalExplainMs += ps.totalExplainMs || 0;
+    if (ps.fastestMs && (!merged.fastestMs || ps.fastestMs < merged.fastestMs)) {
+      merged.fastestMs = ps.fastestMs;
+      merged.fastestWord = ps.fastestWord || '';
+    }
+    Object.entries(ps.byTheme || {}).forEach(([theme, b]) => {
+      const target = merged.byTheme[theme] || (merged.byTheme[theme] = { right: 0, passes: 0, totalExplainMs: 0 });
+      target.right += b.right || 0;
+      target.passes += b.passes || 0;
+      target.totalExplainMs += b.totalExplainMs || 0;
+    });
+    Object.entries(ps.passWords || {}).forEach(([word, count]) => {
+      merged.passWords[word] = (merged.passWords[word] || 0) + count;
+    });
+  });
+  return merged;
+}
+
+function statsPlayerNames(rich) {
+  const recentGuests = (rich.guests || []).slice(0, 4).map(g => g.name);
+  return ['Alla', ...FAMILY_PLAYERS, ...recentGuests.filter(n => !FAMILY_PLAYERS.includes(n))];
+}
+
+function renderStatsTabs(names) {
+  if (!names.includes(statsSelectedPlayer)) statsSelectedPlayer = names[0];
+  document.getElementById('statsTabs').innerHTML = names.map(name =>
+    `<button class="stats-tab ${name === statsSelectedPlayer ? 'active' : ''}" data-player="${esc(name)}" onclick="selectStatsPlayer(this.dataset.player)">${esc(name)}</button>`
+  ).join('');
+}
+
+function selectStatsPlayer(name) {
+  statsSelectedPlayer = name;
+  showStats();
+}
+
+function statCards(ps) {
+  const attempts = (ps.right || 0) + (ps.passes || 0);
+  const avg = ps.right ? ps.totalExplainMs / ps.right : null;
+  return `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-kicker">Förklarade</div><div class="stat-big">${ps.right || 0}</div><div class="stat-sub">${attempts} ord totalt</div></div>
+      <div class="stat-card"><div class="stat-kicker">Träffsäkerhet</div><div class="stat-big">${pct(ps.right || 0, attempts)}%</div><div class="stat-sub">${ps.passes || 0} pass</div></div>
+      <div class="stat-card"><div class="stat-kicker">Snitttid</div><div class="stat-big">${fmtMs(avg)}</div><div class="stat-sub">från visa ord till rätt</div></div>
+      <div class="stat-card"><div class="stat-kicker">Snabbast</div><div class="stat-big">${fmtMs(ps.fastestMs)}</div><div class="stat-sub">${esc(ps.fastestWord || 'inget ord ännu')}</div></div>
+      <div class="stat-card wide"><div class="stat-kicker">Rundor och poäng</div><div class="stat-big">${ps.rounds || 0} / ${ps.points || 0}p</div><div class="stat-sub">rundor spelade / poäng inspelade</div></div>
+    </div>`;
+}
+
+function categoryRows(ps, mode) {
+  const rows = Object.entries(ps.byTheme || {}).map(([theme, b]) => {
+    const total = (b.right || 0) + (b.passes || 0);
+    return { theme, right: b.right || 0, passes: b.passes || 0, total, rate: pct(b.right || 0, total), avg: b.right ? b.totalExplainMs / b.right : null };
+  }).filter(r => r.total);
+
+  const sorted = rows.sort((a, b) => mode === 'weak'
+    ? (a.rate - b.rate) || (b.total - a.total)
+    : (b.rate - a.rate) || ((a.avg || 999999) - (b.avg || 999999))
+  ).slice(0, 4);
+
+  if (!sorted.length) return '<p class="stat-empty">Spela några ord så dyker kategorierna upp här.</p>';
+  return `<div class="stat-bars">${sorted.map(r => `
+    <div class="stat-bar-row">
+      <span>${esc(themeName(r.theme))}</span>
+      <span class="stat-bar-track"><span class="stat-bar-fill ${mode === 'weak' ? 'weak' : ''}" style="width:${Math.max(6, r.rate)}%"></span></span>
+      <span>${r.rate}%</span>
+    </div>
+  `).join('')}</div>`;
+}
+
+function passWordPills(ps) {
+  const words = Object.entries(ps.passWords || {}).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  if (!words.length) return '<p class="stat-empty">Inga klassiska surdegar ännu.</p>';
+  return `<div class="stat-pill-row">${words.map(([word, count]) => `<span class="stat-pill">${esc(word)} · ${count}x</span>`).join('')}</div>`;
+}
+
 function showStats() {
   const t = UI[S.lang];
-  const stats = getStats(S.lang);
+  const rich = getRichStats();
   const rounds = getTotalRounds(S.lang);
   document.getElementById('statsTitle').textContent = t.statsTitle;
-  document.getElementById('statsMeta').textContent  = t.statsMeta(rounds);
-  const entries = Object.entries(stats).sort((a,b) => b[1]-a[1]).slice(0,10);
+  document.getElementById('statsMeta').textContent  = `${rounds} rundor historiskt · ny dashboard fylls på från och med nu`;
+  const names = statsPlayerNames(rich);
+  renderStatsTabs(names);
+  const selectedNames = statsSelectedPlayer === 'Alla' ? names.filter(n => n !== 'Alla') : [statsSelectedPlayer];
+  const ps = mergePlayerStats(selectedNames, rich);
   const content = document.getElementById('statsContent');
-  if (!entries.length) {
-    content.innerHTML = `<p class="stat-empty">${t.statsEmpty}</p>`;
+  const attempts = (ps.right || 0) + (ps.passes || 0);
+  if (!attempts && !ps.rounds) {
+    const legacy = Object.entries(getStats(S.lang)).sort((a,b) => b[1]-a[1]).slice(0, 8);
+    content.innerHTML = `<p class="stat-empty">${t.statsEmpty}</p>` + (legacy.length
+      ? `<div class="stat-section-title">Gammal pass-topplista</div>${legacy.map(([word, count]) =>
+          `<div class="stat-row"><span class="stat-word">${esc(word)}</span><span class="stat-count">${count}x</span></div>`
+        ).join('')}`
+      : '');
   } else {
-    content.innerHTML = entries.map(([word, count]) =>
-      `<div class="stat-row"><span class="stat-word">${word}</span><span class="stat-count">${count}×</span></div>`
-    ).join('');
+    content.innerHTML = `
+      ${statCards(ps)}
+      <div class="stat-section-title">Starkast kategorier</div>
+      ${categoryRows(ps, 'strong')}
+      <div class="stat-section-title">Träningsläge</div>
+      ${categoryRows(ps, 'weak')}
+      <div class="stat-section-title">Ord som bråkade</div>
+      ${passWordPills(ps)}
+    `;
   }
   document.getElementById('statsOverlay').classList.add('open');
 }
@@ -2372,6 +2649,8 @@ function clearStats() {
   const t = UI[S.lang];
   localStorage.removeItem(`mao_stats_${S.lang}`);
   localStorage.removeItem(`mao_rounds_${S.lang}`);
+  localStorage.removeItem(RICH_STATS_KEY);
+  statsSelectedPlayer = 'Alla';
   showStats();
   toast(t.clearStats);
 }
@@ -2440,6 +2719,7 @@ const MP = {
   notifTimer: null,
   autoJoinTried: false,
 };
+const DEVICE_GREETING = Math.random() < 0.5 ? 'skit på dig' : 'Känn lugnet';
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -2660,7 +2940,7 @@ function renderDeviceChip() {
   }
 
   if (MP.deviceOwner) {
-    chip.innerHTML = `Den här enheten: <strong>${MP.deviceOwner}</strong> · <span style="text-decoration:underline">byt enhet</span>`;
+    chip.innerHTML = `${DEVICE_GREETING}, <strong>${MP.deviceOwner.toLowerCase()}</strong> · <span style="text-decoration:underline">byt spelare</span>`;
     chip.onclick = () => {
       setDeviceOwner(null);
       MP.autoJoinTried = false;
@@ -2669,7 +2949,7 @@ function renderDeviceChip() {
       mpSync();
     };
   } else {
-    chip.textContent = 'Den här enheten är inte ihågkommen ännu';
+    chip.textContent = 'Välkommen!';
     chip.onclick = null;
   }
 }
