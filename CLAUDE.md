@@ -13,11 +13,9 @@ Multiplayer via Supabase Realtime. Deployad på Netlify — push till `main` = l
 - Vitest + jsdom för tester
 
 ## Tester
-Kör alltid tester innan push till `main`:
-```
-npm test
-```
-Alla 62 tester ska passera. Ny logik läggs till i `src/game-logic.js` med tillhörande tester i `src/game-logic.test.js`.
+Verifiera ändringar innan push med den lättaste relevanta kontrollen för ändringen.
+För `index.html`: kör åtminstone syntaxkontroll av inline-JS och gärna en snabb browserkontroll av berört flöde.
+Kör inte `npm test` automatiskt i Codex-miljön om `npm` saknas.
 
 ## Git
 - Committa och pusha när en uppgift är klar, utan att fråga
