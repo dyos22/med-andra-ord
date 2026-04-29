@@ -1014,8 +1014,7 @@
     <div class="player-name" id="specPlayerName">—</div>
   </div>
   <div class="card" style="text-align:center;padding:40px 20px">
-    <div style="font-family:var(--font-script);font-size:2rem;margin-bottom:10px;color:var(--blue)">lyssna & gissa!</div>
-    <div style="font-size:1.2rem;font-weight:800;margin-bottom:8px" id="specListenText">Lyssna och gissa!</div>
+    <div style="font-family:var(--font-script);font-size:2rem;margin-bottom:10px;color:var(--blue)" id="specListenText">Lyssna och gissa!</div>
     <div style="color:var(--text-muted);font-size:0.875rem" id="specWaitText">Väntar på att rundan avslutas...</div>
   </div>
   <div class="game-actions">
@@ -1037,221 +1036,103 @@
 // ═══════════════════════════════════════════
 const PERSONS_DATA = {
   easy: [
-    // Athletes
-    'Zlatan Ibrahimović','Cristiano Ronaldo','Lionel Messi','Usain Bolt','Roger Federer',
-    'Serena Williams','Michael Phelps','Muhammad Ali','Pelé','Tiger Woods',
-    'Michael Jordan','LeBron James','Kobe Bryant','Wayne Gretzky','Tom Brady',
-    'Babe Ruth','Ingemar Stenmark','Björn Borg','Annika Sörenstam','Venus Williams',
-    'Simone Biles','Nadia Comaneci','Jesse Owens','Mike Tyson','Novak Djokovic',
-    'Rafael Nadal','Mo Farah','Haile Gebrselassie','Neymar','Ronaldinho',
-    'David Beckham','Zinedine Zidane','Didier Drogba','Thierry Henry','Ronaldo Nazário',
-    'Ayrton Senna','Michael Schumacher','Lewis Hamilton','Sebastian Vettel',
-    // Musicians
-    'Michael Jackson','Elvis Presley','Madonna','Beyoncé','Lady Gaga',
-    'Taylor Swift','Adele','Rihanna','Ed Sheeran','Eminem',
-    'Bob Dylan','David Bowie','Freddie Mercury','Elton John','Bob Marley',
-    'ABBA','The Beatles','Rolling Stones','Led Zeppelin','Queen',
-    'Pink Floyd','AC/DC','Metallica','Prince','Frank Sinatra',
-    'Aretha Franklin','Whitney Houston','Mariah Carey','Tina Turner','Britney Spears',
-    'Justin Bieber','Katy Perry','Bruno Mars','Shakira','Jennifer Lopez',
-    'Drake','Kanye West','Jay-Z','Billie Eilish','Ariana Grande',
-    // Actors / entertainers
-    'Marilyn Monroe','Audrey Hepburn','Charlie Chaplin','Cary Grant','Marlon Brando',
-    'Arnold Schwarzenegger','Tom Cruise','Brad Pitt','Johnny Depp','Leonardo DiCaprio',
-    'Meryl Streep','Julia Roberts','Angelina Jolie','Will Smith','Robin Williams',
-    'Tom Hanks','Denzel Washington','Morgan Freeman','Jim Carrey','Eddie Murphy',
-    'Robert Downey Jr.','Chris Evans','Scarlett Johansson','Dwayne Johnson','Ryan Reynolds',
-    'Ingrid Bergman','Greta Garbo','Sophia Loren','Brigitte Bardot','Grace Kelly',
-    // World leaders / historical
-    'Abraham Lincoln','Nelson Mandela','Martin Luther King','Mahatma Gandhi','Winston Churchill',
-    'Napoleon Bonaparte','Julius Caesar','Cleopatra','Queen Elizabeth II','Barack Obama',
-    'John F. Kennedy','Princess Diana','Adolf Hitler','Joseph Stalin','Mao Zedong',
-    'Franklin Roosevelt','Vladimir Putin','Donald Trump','Margaret Thatcher','Angela Merkel',
-    // Scientists / innovators
-    'Albert Einstein','Isaac Newton','Marie Curie','Nikola Tesla','Charles Darwin',
-    'Stephen Hawking','Galileo Galilei','Thomas Edison','Alexander Graham Bell','Louis Pasteur',
-    'Sigmund Freud','Steve Jobs','Bill Gates','Elon Musk','Mark Zuckerberg',
-    'Jeff Bezos','Alan Turing','Carl Sagan','Neil deGrasse Tyson',
-    // Artists / writers / creators
-    'William Shakespeare','Leonardo da Vinci','Pablo Picasso','Vincent van Gogh','Walt Disney',
-    'Astrid Lindgren','J.K. Rowling','Agatha Christie','Roald Dahl','Stephen King',
-    'Mother Teresa','Princess Diana','Oprah Winfrey',
-    // Fictional – very widely known
-    'Harry Potter','Hermione Granger','Darth Vader','Luke Skywalker','Yoda',
-    'Batman','Superman','Spider-Man','Iron Man','Wonder Woman',
-    'Hulk','Thor','Captain America','The Joker','Thanos',
-    'Mickey Mouse','Donald Duck','Winnie the Pooh','Simba','Nemo',
-    'Buzz Lightyear','Woody','Shrek','Gandalf','Frodo Baggins',
-    'Sherlock Holmes','James Bond','Indiana Jones','Jack Sparrow','Katniss Everdeen',
-    'Mario','Luigi','Pikachu','Sonic the Hedgehog','Pac-Man',
-    'SpongeBob SquarePants','Homer Simpson','Bart Simpson','Scooby-Doo','Bugs Bunny',
-    'Elsa','Anna','Moana','Rapunzel','Cinderella',
-    'Snow White','Sleeping Beauty','Ariel','Belle','Mulan',
-    'Jon Snow','Daenerys Targaryen','Tyrion Lannister',
-    'Walter White','Jack Sparrow','Forrest Gump','Edward Scissorhands',
-    'Dracula','Frankenstein\'s Monster','Tarzan','Zorro',
+    'Zlatan Ibrahimović','Cristiano Ronaldo','Lionel Messi','Usain Bolt','Roger Federer','Serena Williams','Michael Phelps','Muhammad Ali','Pelé','Tiger Woods',
+    'Michael Jordan','LeBron James','Kobe Bryant','Wayne Gretzky','Tom Brady','Babe Ruth','Ingemar Stenmark','Björn Borg','Annika Sörenstam','Venus Williams',
+    'Simone Biles','Nadia Comaneci','Jesse Owens','Mike Tyson','Novak Djokovic','Rafael Nadal','Mo Farah','Haile Gebrselassie','Neymar','Ronaldinho',
+    'David Beckham','Zinedine Zidane','Didier Drogba','Thierry Henry','Ronaldo Nazário','Ayrton Senna','Michael Schumacher','Lewis Hamilton','Sebastian Vettel','Michael Jackson',
+    'Elvis Presley','Madonna','Beyoncé','Lady Gaga','Taylor Swift','Adele','Rihanna','Ed Sheeran','Eminem','Bob Dylan',
+    'David Bowie','Freddie Mercury','Elton John','Bob Marley','ABBA','The Beatles','Rolling Stones','Led Zeppelin','Queen','Pink Floyd',
+    'AC/DC','Metallica','Prince','Frank Sinatra','Aretha Franklin','Whitney Houston','Mariah Carey','Tina Turner','Britney Spears','Justin Bieber',
+    'Katy Perry','Bruno Mars','Shakira','Jennifer Lopez','Drake','Kanye West','Jay-Z','Billie Eilish','Ariana Grande','Marilyn Monroe',
+    'Audrey Hepburn','Charlie Chaplin','Cary Grant','Marlon Brando','Arnold Schwarzenegger','Tom Cruise','Brad Pitt','Johnny Depp','Leonardo DiCaprio','Meryl Streep',
+    'Julia Roberts','Angelina Jolie','Will Smith','Robin Williams','Tom Hanks','Denzel Washington','Morgan Freeman','Jim Carrey','Eddie Murphy','Robert Downey Jr.',
+    'Chris Evans','Scarlett Johansson','Dwayne Johnson','Ryan Reynolds','Ingrid Bergman','Greta Garbo','Sophia Loren','Brigitte Bardot','Grace Kelly','Abraham Lincoln',
+    'Nelson Mandela','Martin Luther King','Mahatma Gandhi','Winston Churchill','Napoleon Bonaparte','Julius Caesar','Cleopatra','Queen Elizabeth II','Barack Obama','John F. Kennedy',
+    'Princess Diana','Adolf Hitler','Joseph Stalin','Mao Zedong','Franklin Roosevelt','Vladimir Putin','Donald Trump','Margaret Thatcher','Angela Merkel','Albert Einstein',
+    'Isaac Newton','Marie Curie','Nikola Tesla','Charles Darwin','Stephen Hawking','Galileo Galilei','Thomas Edison','Alexander Graham Bell','Louis Pasteur','Sigmund Freud',
+    'Steve Jobs','Bill Gates','Elon Musk','Mark Zuckerberg','Jeff Bezos','Alan Turing','Carl Sagan','Neil deGrasse Tyson','William Shakespeare','Leonardo da Vinci',
+    'Pablo Picasso','Vincent van Gogh','Walt Disney','Astrid Lindgren','J.K. Rowling','Agatha Christie','Roald Dahl','Stephen King','Mother Teresa','Oprah Winfrey',
+    'Harry Potter','Hermione Granger','Darth Vader','Luke Skywalker','Yoda','Batman','Superman','Spider-Man','Iron Man','Wonder Woman',
+    'Hulk','Thor','Captain America','The Joker','Thanos','Mickey Mouse','Donald Duck','Winnie the Pooh','Simba','Nemo',
+    'Buzz Lightyear','Woody','Shrek','Gandalf','Frodo Baggins','Sherlock Holmes','James Bond','Indiana Jones','Jack Sparrow','Katniss Everdeen',
+    'Mario','Luigi','Pikachu','Sonic the Hedgehog','Pac-Man','SpongeBob SquarePants','Homer Simpson','Bart Simpson','Scooby-Doo','Bugs Bunny',
+    'Elsa','Anna','Moana','Rapunzel','Cinderella','Snow White','Sleeping Beauty','Ariel','Belle','Mulan',
+    'Jon Snow','Daenerys Targaryen','Tyrion Lannister','Walter White','Forrest Gump','Edward Scissorhands','Dracula','Frankenstein\'s Monster','Tarzan','Zorro',
   ],
   medium: [
-    // Athletes
-    'Johan Cruyff','Franz Beckenbauer','George Best','Bobby Charlton','Bobby Moore',
-    'Jack Nicklaus','Arnold Palmer','Greg Norman','Seve Ballesteros','Nick Faldo',
-    'Martina Navratilova','Billie Jean King','Pete Sampras','Andre Agassi','Jimmy Connors',
-    'John McEnroe','Boris Becker','Stefan Edberg','Mats Wilander','Guillermo Vilas',
-    'Mia Hamm','Marta','Ronaldo R9','Romário','Rivaldo','Zico',
-    'Sugar Ray Leonard','Joe Frazier','George Foreman','Evander Holyfield','Manny Pacquiao',
-    'Magic Johnson','Larry Bird','Kareem Abdul-Jabbar','Shaquille O\'Neal','Charles Barkley',
-    'Diego Maradona','Garrincha','Eusébio','George Best','Paolo Maldini',
-    'Niki Lauda','James Hunt','Alain Prost','Nigel Mansell','Jackie Stewart',
-    'Eric Cantona','Thierry Henry','Dennis Bergkamp','Patrick Vieira','Roy Keane',
-    'Roger Bannister','Emil Zátopek','Paavo Nurmi','Carl Lewis','Ben Johnson',
-    // Musicians
-    'Jimi Hendrix','Jim Morrison','Janis Joplin','Kurt Cobain','Amy Winehouse',
-    'Leonard Cohen','Joni Mitchell','Neil Young','Carole King','James Brown',
-    'Ray Charles','Stevie Wonder','Nina Simone','Miles Davis','Louis Armstrong',
-    'Duke Ellington','John Coltrane','Charlie Parker','Billie Holiday','Ella Fitzgerald',
-    'Dolly Parton','Johnny Cash','Willie Nelson','Hank Williams','Patsy Cline',
-    'Björk','Kate Bush','Patti Smith','Iggy Pop','Lou Reed',
-    'Dean Martin','Nat King Cole','Tony Bennett','Sammy Davis Jr.','Bing Crosby',
-    'Chuck Berry','Little Richard','Fats Domino','Jerry Lee Lewis','Carl Perkins',
-    'Fleetwood Mac','Eagles','The Who','The Kinks','The Doors',
-    'Nirvana','Pearl Jam','Soundgarden','Alice in Chains','Red Hot Chili Peppers',
-    'Depeche Mode','The Cure','Joy Division','New Order','The Smiths',
-    // Actors / directors
-    'Katharine Hepburn','Bette Davis','James Stewart','Gregory Peck','Orson Welles',
-    'Alfred Hitchcock','Stanley Kubrick','Martin Scorsese','Steven Spielberg','George Lucas',
-    'Francis Ford Coppola','Quentin Tarantino','Tim Burton','Woody Allen','Billy Wilder',
-    'Clint Eastwood','Jack Nicholson','Dustin Hoffman','Robert De Niro','Al Pacino',
-    'Gene Hackman','Paul Newman','Steve McQueen','Peter Sellers','Sean Connery',
-    'Vivien Leigh','Elizabeth Taylor','Audrey Hepburn','Grace Kelly','Ingrid Bergman',
-    'Humphrey Bogart','Clark Gable','Kirk Douglas','Burt Lancaster','Henry Fonda',
-    'Cate Blanchett','Natalie Portman','Kate Winslet','Charlize Theron','Halle Berry',
-    // Writers
-    'Ernest Hemingway','F. Scott Fitzgerald','William Faulkner','John Steinbeck','Mark Twain',
-    'Charles Dickens','Jane Austen','George Orwell','Franz Kafka','Albert Camus',
-    'Jean-Paul Sartre','Simone de Beauvoir','Virginia Woolf','James Joyce','Marcel Proust',
-    'Gabriel García Márquez','Pablo Neruda','Jorge Luis Borges','Umberto Eco','Milan Kundera',
-    'August Strindberg','Selma Lagerlöf','Henrik Ibsen','Knut Hamsun','Dan Brown',
-    'Lee Child','Stieg Larsson','John Grisham','Michael Crichton','Tom Clancy',
-    'Fyodor Dostoyevsky','Leo Tolstoy','Anton Chekhov','Ivan Turgenev','Nikolai Gogol',
-    'Victor Hugo','Alexandre Dumas','Gustave Flaubert','Émile Zola','Honoré de Balzac',
-    // Historical
-    'Marie Antoinette','Anne Boleyn','Queen Victoria','Florence Nightingale','Amelia Earhart',
-    'Rosa Parks','Harriet Tubman','Emmeline Pankhurst','Sojourner Truth','Malala Yousafzai',
-    'Che Guevara','Fidel Castro','Ho Chi Minh','Vladimir Lenin','Leon Trotsky',
-    'Indira Gandhi','Golda Meir','Benazir Bhutto','Aung San Suu Kyi','Eva Perón',
-    'Christopher Columbus','Vasco da Gama','Ferdinand Magellan','Marco Polo','Hernán Cortés',
-    'Oliver Cromwell','Richard III','Henry VIII','Elizabeth I','Mary Queen of Scots',
-    'Catherine the Great','Peter the Great','Frederick the Great','Louis XIV','Richelieu',
-    // Scientists (medium)
-    'Richard Feynman','Robert Oppenheimer','Niels Bohr','Max Planck','Erwin Schrödinger',
-    'Werner Heisenberg','James Watson','Francis Crick','Alan Turing','John von Neumann',
-    'Ada Lovelace','Grace Hopper','Richard Dawkins','Stephen Jay Gould','E.O. Wilson',
-    'Carl Linnaeus','Alexander von Humboldt','Alfred Russel Wallace','Joseph Banks',
-    // Fictional (medium difficulty)
-    'Sherlock Holmes','Professor Moriarty','Dr. Watson','Hannibal Lecter','Clarice Starling',
-    'Atticus Finch','Holden Caulfield','Jay Gatsby','Don Quixote','Robinson Crusoe',
-    'Elizabeth Bennet','Mr. Darcy','Jane Eyre','Heathcliff','Emma Woodhouse',
-    'Jean Valjean','Edmond Dantès','Captain Ahab','Long John Silver','Jim Hawkins',
-    'Hamlet','Ophelia','Macbeth','Lady Macbeth','Romeo','Juliet','Othello',
-    'Anna Karenina','Raskolnikov','Natasha Rostova','Pierre Bezukhov',
-    'Draco Malfoy','Severus Snape','Albus Dumbledore','Lord Voldemort','Ron Weasley',
-    'Aragorn','Legolas','Gimli','Samwise Gamgee','Bilbo Baggins','Gandalf the White',
-    'Cersei Lannister','Arya Stark','Sansa Stark','Ned Stark','Jaime Lannister',
-    'Walter White','Jesse Pinkman','Tony Soprano','Don Draper','Frank Underwood',
-    'Dexter Morgan','Gregory House','Jack Bauer','Fox Mulder','Dana Scully',
-    'Lara Croft','Master Chief','Cloud Strife','Link','Zelda',
-    'Gollum','Saruman','Sauron','Boromir','Éowyn',
-    'Hannibal Lecter','Norman Bates','Patrick Bateman','Alex DeLarge','Travis Bickle',
-    'Ethan Hunt','Jason Bourne','Lara Croft','Ellen Ripley','Sarah Connor',
-    'Terminator','RoboCop','Judge Dredd','Mad Max','The Dude',
+    'Johan Cruyff','Franz Beckenbauer','George Best','Bobby Charlton','Bobby Moore','Jack Nicklaus','Arnold Palmer','Greg Norman','Seve Ballesteros','Nick Faldo',
+    'Martina Navratilova','Billie Jean King','Pete Sampras','Andre Agassi','Jimmy Connors','John McEnroe','Boris Becker','Stefan Edberg','Mats Wilander','Guillermo Vilas',
+    'Mia Hamm','Marta','Ronaldo R9','Romário','Rivaldo','Zico','Sugar Ray Leonard','Joe Frazier','George Foreman','Evander Holyfield',
+    'Manny Pacquiao','Magic Johnson','Larry Bird','Kareem Abdul-Jabbar','Shaquille O\'Neal','Charles Barkley','Diego Maradona','Garrincha','Eusébio','Paolo Maldini',
+    'Niki Lauda','James Hunt','Alain Prost','Nigel Mansell','Jackie Stewart','Eric Cantona','Dennis Bergkamp','Patrick Vieira','Roy Keane','Roger Bannister',
+    'Emil Zátopek','Paavo Nurmi','Carl Lewis','Ben Johnson','Jimi Hendrix','Jim Morrison','Janis Joplin','Kurt Cobain','Amy Winehouse','Leonard Cohen',
+    'Joni Mitchell','Neil Young','Carole King','James Brown','Ray Charles','Stevie Wonder','Nina Simone','Miles Davis','Louis Armstrong','Duke Ellington',
+    'John Coltrane','Charlie Parker','Billie Holiday','Ella Fitzgerald','Dolly Parton','Johnny Cash','Willie Nelson','Hank Williams','Patsy Cline','Björk',
+    'Kate Bush','Patti Smith','Iggy Pop','Lou Reed','Dean Martin','Nat King Cole','Tony Bennett','Sammy Davis Jr.','Bing Crosby','Chuck Berry',
+    'Little Richard','Fats Domino','Jerry Lee Lewis','Carl Perkins','Fleetwood Mac','Eagles','The Who','The Kinks','The Doors','Nirvana',
+    'Pearl Jam','Soundgarden','Alice in Chains','Red Hot Chili Peppers','Depeche Mode','The Cure','Joy Division','New Order','The Smiths','Katharine Hepburn',
+    'Bette Davis','James Stewart','Gregory Peck','Orson Welles','Alfred Hitchcock','Stanley Kubrick','Martin Scorsese','Steven Spielberg','George Lucas','Francis Ford Coppola',
+    'Quentin Tarantino','Tim Burton','Woody Allen','Billy Wilder','Clint Eastwood','Jack Nicholson','Dustin Hoffman','Robert De Niro','Al Pacino','Gene Hackman',
+    'Paul Newman','Steve McQueen','Peter Sellers','Sean Connery','Vivien Leigh','Elizabeth Taylor','Humphrey Bogart','Clark Gable','Kirk Douglas','Burt Lancaster',
+    'Henry Fonda','Cate Blanchett','Natalie Portman','Kate Winslet','Charlize Theron','Halle Berry','Ernest Hemingway','F. Scott Fitzgerald','William Faulkner','John Steinbeck',
+    'Mark Twain','Charles Dickens','Jane Austen','George Orwell','Franz Kafka','Albert Camus','Jean-Paul Sartre','Simone de Beauvoir','Virginia Woolf','James Joyce',
+    'Marcel Proust','Gabriel García Márquez','Pablo Neruda','Jorge Luis Borges','Umberto Eco','Milan Kundera','August Strindberg','Selma Lagerlöf','Henrik Ibsen','Knut Hamsun',
+    'Dan Brown','Lee Child','Stieg Larsson','John Grisham','Michael Crichton','Tom Clancy','Fyodor Dostoyevsky','Leo Tolstoy','Anton Chekhov','Ivan Turgenev',
+    'Nikolai Gogol','Victor Hugo','Alexandre Dumas','Gustave Flaubert','Émile Zola','Honoré de Balzac','Marie Antoinette','Anne Boleyn','Queen Victoria','Florence Nightingale',
+    'Amelia Earhart','Rosa Parks','Harriet Tubman','Emmeline Pankhurst','Sojourner Truth','Malala Yousafzai','Che Guevara','Fidel Castro','Ho Chi Minh','Vladimir Lenin',
+    'Leon Trotsky','Indira Gandhi','Golda Meir','Benazir Bhutto','Aung San Suu Kyi','Eva Perón','Christopher Columbus','Vasco da Gama','Ferdinand Magellan','Marco Polo',
+    'Hernán Cortés','Oliver Cromwell','Richard III','Henry VIII','Elizabeth I','Mary Queen of Scots','Catherine the Great','Peter the Great','Frederick the Great','Louis XIV',
+    'Richelieu','Richard Feynman','Robert Oppenheimer','Niels Bohr','Max Planck','Erwin Schrödinger','Werner Heisenberg','James Watson','Francis Crick','John von Neumann',
+    'Ada Lovelace','Grace Hopper','Richard Dawkins','Stephen Jay Gould','E.O. Wilson','Carl Linnaeus','Alexander von Humboldt','Alfred Russel Wallace','Joseph Banks','Professor Moriarty',
+    'Dr. Watson','Hannibal Lecter','Clarice Starling','Atticus Finch','Holden Caulfield','Jay Gatsby','Don Quixote','Robinson Crusoe','Elizabeth Bennet','Mr. Darcy',
+    'Jane Eyre','Heathcliff','Emma Woodhouse','Jean Valjean','Edmond Dantès','Captain Ahab','Long John Silver','Jim Hawkins','Hamlet','Ophelia',
+    'Macbeth','Lady Macbeth','Romeo','Juliet','Othello','Anna Karenina','Raskolnikov','Natasha Rostova','Pierre Bezukhov','Draco Malfoy',
+    'Severus Snape','Albus Dumbledore','Lord Voldemort','Ron Weasley','Aragorn','Legolas','Gimli','Samwise Gamgee','Bilbo Baggins','Gandalf the White',
+    'Cersei Lannister','Arya Stark','Sansa Stark','Ned Stark','Jaime Lannister','Jesse Pinkman','Tony Soprano','Don Draper','Frank Underwood','Dexter Morgan',
+    'Gregory House','Jack Bauer','Fox Mulder','Dana Scully','Lara Croft','Master Chief','Cloud Strife','Link','Zelda','Gollum',
+    'Saruman','Sauron','Boromir','Éowyn','Norman Bates','Patrick Bateman','Alex DeLarge','Travis Bickle','Ethan Hunt','Jason Bourne',
+    'Ellen Ripley','Sarah Connor','Terminator','RoboCop','Judge Dredd','Mad Max','The Dude',
   ],
   hard: [
-    // Ancient / medieval historical
-    'Hypatia of Alexandria','Hildegard of Bingen','Christine de Pizan','Murasaki Shikibu',
-    'Eleanor of Aquitaine','Isabella of Castile','Catherine de Medici','Mary Wollstonecraft',
-    'Empress Wu','Zenobia of Palmyra','Boadicea','Hatshepsut','Nefertiti',
-    'Theodora','Irene of Athens','Anna Komnene','Clare of Assisi','Héloïse',
-    'Birger Jarl','Magnus Ladulås','Erik den helige','Kristina av Sverige','Engelbrekt Engelbrektsson',
-    'Nils Dacke','Carl XII','Axel Oxenstierna','Johan III','Gustav Vasa',
-    'Averroes','Avicenna','Al-Ghazali','Ibn Battuta','Ibn Khaldun','Al-Biruni',
-    'Confucius','Laozi','Sun Tzu','Mencius','Zhuangzi',
-    'Hannibal Barca','Scipio Africanus','Vercingetorix','Arminius','Boudicca',
-    'Tamerlane','Genghis Khan','Kublai Khan','Attila the Hun','Alaric',
-    'Saladin','Richard the Lionheart','Godfrey of Bouillon','Frederick Barbarossa',
-    // Scientists / mathematicians
-    'Gottfried Leibniz','Carl Gauss','Leonhard Euler','David Hilbert','Georg Cantor',
-    'Emmy Noether','Srinivasa Ramanujan','Kurt Gödel','John Nash','Paul Erdős',
-    'Lise Meitner','Rosalind Franklin','Barbara McClintock','Chien-Shiung Wu','Vera Rubin',
-    'Wilhelm Röntgen','Ernest Rutherford','Enrico Fermi','J. Robert Oppenheimer','Klaus Fuchs',
-    'Tycho Brahe','Johannes Kepler','Nicolaus Copernicus','Ptolemy','Hipparchus',
-    'Anders Celsius','Jöns Jacob Berzelius','Svante Arrhenius','Hannes Alfvén',
-    'Gregor Mendel','Ivan Pavlov','Santiago Ramón y Cajal','Paul Broca','Carl Wernicke',
-    'Charles Babbage','Ada Lovelace','George Boole','Claude Shannon','Norbert Wiener',
-    // Philosophers
-    'Baruch Spinoza','David Hume','John Locke','Georg Wilhelm Friedrich Hegel',
-    'Søren Kierkegaard','Arthur Schopenhauer','Ludwig Wittgenstein','Bertrand Russell',
-    'Martin Heidegger','Edmund Husserl','Walter Benjamin','Hannah Arendt','Simone Weil',
-    'Jürgen Habermas','Michel Foucault','Jacques Derrida','Gilles Deleuze','Jacques Lacan',
-    'Roland Barthes','Claude Lévi-Strauss','Pierre Bourdieu','Jean Baudrillard',
-    'Blaise Pascal','René Descartes','Immanuel Kant','Friedrich Nietzsche',
-    'Giordano Bruno','Hypatia','Porphyry','Plotinus','Proclus',
-    'John Stuart Mill','Jeremy Bentham','Herbert Spencer','Auguste Comte','Georg Simmel',
-    // Artists
-    'Hieronymus Bosch','Pieter Bruegel the Elder','Jan van Eyck','Roger van der Weyden',
-    'Albrecht Dürer','Hans Holbein the Younger','El Greco','Diego Velázquez','Francisco de Goya',
-    'Eugène Delacroix','Gustave Courbet','Édouard Manet','Edgar Degas','Paul Cézanne',
-    'Georges Seurat','Paul Gauguin','Henri de Toulouse-Lautrec','Gustav Klimt','Egon Schiele',
-    'Wassily Kandinsky','Paul Klee','Ernst Ludwig Kirchner','Max Ernst','René Magritte',
-    'Giorgio de Chirico','Joan Miró','Sandro Botticelli','Fra Angelico','Giotto di Bondone',
-    'Tintoretto','Titian','Paolo Veronese','Caravaggio','Artemisia Gentileschi',
-    // Classical composers
-    'Johann Sebastian Bach','Wolfgang Amadeus Mozart','Ludwig van Beethoven','Franz Schubert',
-    'Frédéric Chopin','Robert Schumann','Johannes Brahms','Franz Liszt','Richard Wagner',
-    'Giuseppe Verdi','Giacomo Puccini','Hector Berlioz','Camille Saint-Saëns','Gabriel Fauré',
-    'Claude Debussy','Maurice Ravel','Igor Stravinsky','Béla Bartók','Dmitri Shostakovich',
-    'Sergei Prokofiev','Sergei Rachmaninoff','Pyotr Tchaikovsky','Antonín Dvořák','Gustav Mahler',
-    'Anton Bruckner','Hugo Wolf','Hugo von Hofmannsthal','Richard Strauss','Carl Nielsen',
-    'Jean Sibelius','Edvard Grieg','Bedřich Smetana','Leoš Janáček','Modest Mussorgsky',
-    // Writers
-    'Dante Alighieri','Geoffrey Chaucer','François Rabelais','Michel de Montaigne','Edmund Spenser',
-    'John Milton','John Donne','Alexander Pope','Jonathan Swift','Samuel Johnson',
-    'Laurence Sterne','Henry Fielding','Samuel Richardson','Tobias Smollett','Oliver Goldsmith',
-    'Percy Bysshe Shelley','Lord Byron','John Keats','William Blake','Samuel Taylor Coleridge',
-    'William Wordsworth','Alfred Lord Tennyson','Robert Browning','Gerard Manley Hopkins',
-    'George Eliot','Thomas Hardy','Anthony Trollope','Wilkie Collins','George Gissing',
-    'Herman Melville','Nathaniel Hawthorne','Edgar Allan Poe','Walt Whitman','Henry David Thoreau',
-    'Ralph Waldo Emerson','Harriet Beecher Stowe','Ambrose Bierce','O. Henry','Jack London',
-    'Carl Michael Bellman','August Strindberg','Gustaf Fröding','Verner von Heidenstam',
-    'Emanuel Swedenborg','Carl Jonas Love Almqvist','Erik Gustaf Geijer','Viktor Rydberg',
-    'Per Lagerkvist','Hjalmar Söderberg','Vilhelm Moberg','Dag Hammarskjöld',
-    // Fictional – more obscure / literary
-    'Raskolnikov','Alyosha Karamazov','Ivan Karamazov','Dmitri Karamazov','Prince Myshkin',
-    'Oblomov','Pechorin','Chichikov','Akaky Akakievich','Natasha Ivanovna',
-    'Gregor Samsa','Josef K.','Stephen Dedalus','Leopold Bloom','Molly Bloom',
-    'Mrs. Dalloway','Septimus Warren Smith','Orlando','Lily Briscoe',
-    'Nora Helmer','Hedda Gabler','Peer Gynt','Rosmersholm','The Master Builder',
-    'Raskolnikov','Rodion','Myshkin','Rogozhin','Nastasya Filipovna',
-    'Don Quixote','Sancho Panza','Dulcinea','Rocinante',
-    'Pantagruel','Panurge','Gargantua','Falstaff','Prince Hal',
-    'Mephistopheles','Faust','Gretchen','Werther','Wilhelm Meister',
-    'Emma Bovary','Charles Bovary','Frédéric Moreau','Julien Sorel','Père Goriot',
-    'Edmond Dantès','Fernand Mondego','Mercédès','Abbé Faria','Villefort',
-    'Cyrano de Bergerac','Roxane','Christian de Neuvillette',
-    'Long John Silver','Jim Hawkins','Captain Flint','Dr. Livesey','Squire Trelawney',
-    'Dorian Gray','Lord Henry Wotton','Basil Hallward',
-    'Captain Ahab','Ishmael','Queequeg','Starbuck','Moby Dick',
-    'Billy Budd','Bartleby','Babo',
+    'Hypatia of Alexandria','Hildegard of Bingen','Christine de Pizan','Murasaki Shikibu','Eleanor of Aquitaine','Isabella of Castile','Catherine de Medici','Mary Wollstonecraft','Empress Wu','Zenobia of Palmyra',
+    'Boadicea','Hatshepsut','Nefertiti','Theodora','Irene of Athens','Anna Komnene','Clare of Assisi','Héloïse','Birger Jarl','Magnus Ladulås',
+    'Erik den helige','Kristina av Sverige','Engelbrekt Engelbrektsson','Nils Dacke','Carl XII','Axel Oxenstierna','Johan III','Gustav Vasa','Averroes','Avicenna',
+    'Al-Ghazali','Ibn Battuta','Ibn Khaldun','Al-Biruni','Confucius','Laozi','Sun Tzu','Mencius','Zhuangzi','Hannibal Barca',
+    'Scipio Africanus','Vercingetorix','Arminius','Boudicca','Tamerlane','Genghis Khan','Kublai Khan','Attila the Hun','Alaric','Saladin',
+    'Richard the Lionheart','Godfrey of Bouillon','Frederick Barbarossa','Gottfried Leibniz','Carl Gauss','Leonhard Euler','David Hilbert','Georg Cantor','Emmy Noether','Srinivasa Ramanujan',
+    'Kurt Gödel','John Nash','Paul Erdős','Lise Meitner','Rosalind Franklin','Barbara McClintock','Chien-Shiung Wu','Vera Rubin','Wilhelm Röntgen','Ernest Rutherford',
+    'Enrico Fermi','J. Robert Oppenheimer','Klaus Fuchs','Tycho Brahe','Johannes Kepler','Nicolaus Copernicus','Ptolemy','Hipparchus','Anders Celsius','Jöns Jacob Berzelius',
+    'Svante Arrhenius','Hannes Alfvén','Gregor Mendel','Ivan Pavlov','Santiago Ramón y Cajal','Paul Broca','Carl Wernicke','Charles Babbage','George Boole','Claude Shannon',
+    'Norbert Wiener','Baruch Spinoza','David Hume','John Locke','Georg Wilhelm Friedrich Hegel','Søren Kierkegaard','Arthur Schopenhauer','Ludwig Wittgenstein','Bertrand Russell','Martin Heidegger',
+    'Edmund Husserl','Walter Benjamin','Hannah Arendt','Simone Weil','Jürgen Habermas','Michel Foucault','Jacques Derrida','Gilles Deleuze','Jacques Lacan','Roland Barthes',
+    'Claude Lévi-Strauss','Pierre Bourdieu','Jean Baudrillard','Blaise Pascal','René Descartes','Immanuel Kant','Friedrich Nietzsche','Giordano Bruno','Hypatia','Porphyry',
+    'Plotinus','Proclus','John Stuart Mill','Jeremy Bentham','Herbert Spencer','Auguste Comte','Georg Simmel','Hieronymus Bosch','Pieter Bruegel the Elder','Jan van Eyck',
+    'Roger van der Weyden','Albrecht Dürer','Hans Holbein the Younger','El Greco','Diego Velázquez','Francisco de Goya','Eugène Delacroix','Gustave Courbet','Édouard Manet','Edgar Degas',
+    'Paul Cézanne','Georges Seurat','Paul Gauguin','Henri de Toulouse-Lautrec','Gustav Klimt','Egon Schiele','Wassily Kandinsky','Paul Klee','Ernst Ludwig Kirchner','Max Ernst',
+    'René Magritte','Giorgio de Chirico','Joan Miró','Sandro Botticelli','Fra Angelico','Giotto di Bondone','Tintoretto','Titian','Paolo Veronese','Caravaggio',
+    'Artemisia Gentileschi','Johann Sebastian Bach','Wolfgang Amadeus Mozart','Ludwig van Beethoven','Franz Schubert','Frédéric Chopin','Robert Schumann','Johannes Brahms','Franz Liszt','Richard Wagner',
+    'Giuseppe Verdi','Giacomo Puccini','Hector Berlioz','Camille Saint-Saëns','Gabriel Fauré','Claude Debussy','Maurice Ravel','Igor Stravinsky','Béla Bartók','Dmitri Shostakovich',
+    'Sergei Prokofiev','Sergei Rachmaninoff','Pyotr Tchaikovsky','Antonín Dvořák','Gustav Mahler','Anton Bruckner','Hugo Wolf','Hugo von Hofmannsthal','Richard Strauss','Carl Nielsen',
+    'Jean Sibelius','Edvard Grieg','Bedřich Smetana','Leoš Janáček','Modest Mussorgsky','Dante Alighieri','Geoffrey Chaucer','François Rabelais','Michel de Montaigne','Edmund Spenser',
+    'John Milton','John Donne','Alexander Pope','Jonathan Swift','Samuel Johnson','Laurence Sterne','Henry Fielding','Samuel Richardson','Tobias Smollett','Oliver Goldsmith',
+    'Percy Bysshe Shelley','Lord Byron','John Keats','William Blake','Samuel Taylor Coleridge','William Wordsworth','Alfred Lord Tennyson','Robert Browning','Gerard Manley Hopkins','George Eliot',
+    'Thomas Hardy','Anthony Trollope','Wilkie Collins','George Gissing','Herman Melville','Nathaniel Hawthorne','Edgar Allan Poe','Walt Whitman','Henry David Thoreau','Ralph Waldo Emerson',
+    'Harriet Beecher Stowe','Ambrose Bierce','O. Henry','Jack London','Carl Michael Bellman','Gustaf Fröding','Verner von Heidenstam','Emanuel Swedenborg','Carl Jonas Love Almqvist','Erik Gustaf Geijer',
+    'Viktor Rydberg','Per Lagerkvist','Hjalmar Söderberg','Vilhelm Moberg','Dag Hammarskjöld','Alyosha Karamazov','Ivan Karamazov','Dmitri Karamazov','Prince Myshkin','Oblomov',
+    'Pechorin','Chichikov','Akaky Akakievich','Natasha Ivanovna','Gregor Samsa','Josef K.','Stephen Dedalus','Leopold Bloom','Molly Bloom','Mrs. Dalloway',
+    'Septimus Warren Smith','Orlando','Lily Briscoe','Nora Helmer','Hedda Gabler','Peer Gynt','Rosmersholm','The Master Builder','Rodion','Myshkin',
+    'Rogozhin','Nastasya Filipovna','Sancho Panza','Dulcinea','Rocinante','Pantagruel','Panurge','Gargantua','Falstaff','Prince Hal',
+    'Mephistopheles','Faust','Gretchen','Werther','Wilhelm Meister','Emma Bovary','Charles Bovary','Frédéric Moreau','Julien Sorel','Père Goriot',
+    'Fernand Mondego','Mercédès','Abbé Faria','Villefort','Cyrano de Bergerac','Roxane','Christian de Neuvillette','Captain Flint','Dr. Livesey','Squire Trelawney',
+    'Dorian Gray','Lord Henry Wotton','Basil Hallward','Ishmael','Queequeg','Starbuck','Moby Dick','Billy Budd','Bartleby','Babo',
   ],
   barn: [
-    'Zlatan Ibrahimović','Cristiano Ronaldo','Lionel Messi','Serena Williams','LeBron James','Usain Bolt',
-    'Taylor Swift','Beyoncé','Justin Bieber','Billie Eilish','Ed Sheeran','Ariana Grande',
-    'Greta Thunberg','Barack Obama','Elon Musk','MrBeast','PewDiePie',
-    'Harry Potter','Hermione Granger','Ron Weasley','Albus Dumbledore','Voldemort',
-    'Spiderman','Batman','Superman','Iron Man','Wonder Woman','Darth Vader','Yoda','Luke Skywalker',
-    'Pikachu','Ash Ketchum','Naruto','Son Goku','Luffy','Elsa','Moana','Simba','Bambi',
-    'Pippi Långstrump','Emil i Lönneberga','Alfons Åberg','Bamse','Karlsson på taket',
-    'Mickey Mouse','Donald Duck','SpongeBob','Patrick Star','Sandy Cheeks',
-    'Minecraft-Steve','Creeper','Enderman','Nemo','Dory','Shrek','Donkey',
+    'Zlatan Ibrahimović','Cristiano Ronaldo','Lionel Messi','Serena Williams','LeBron James','Usain Bolt','Taylor Swift','Beyoncé','Justin Bieber','Billie Eilish',
+    'Ed Sheeran','Ariana Grande','Greta Thunberg','Barack Obama','Elon Musk','MrBeast','PewDiePie','Harry Potter','Hermione Granger','Ron Weasley',
+    'Albus Dumbledore','Voldemort','Spiderman','Batman','Superman','Iron Man','Wonder Woman','Darth Vader','Yoda','Luke Skywalker',
+    'Pikachu','Ash Ketchum','Naruto','Son Goku','Luffy','Elsa','Moana','Simba','Bambi','Pippi Långstrump',
+    'Emil i Lönneberga','Alfons Åberg','Bamse','Karlsson på taket','Mickey Mouse','Donald Duck','SpongeBob','Patrick Star','Sandy Cheeks','Minecraft-Steve',
+    'Creeper','Enderman','Nemo','Dory','Shrek','Donkey',
   ],
 };
 
@@ -1276,52 +1157,38 @@ const WORDS = {
         'giraff','pingvin','delfin','val','björn','räv','varg','hjort','apelsin','citron',
         'melon','mango','päron','plommon','körsbär','hallon','tårta','kaka','choklad','godis',
         'chips','popcorn','hamburgare','sushi','tacos','fotboll','tennis','simning','cykling','löpning',
-        'hockey','basket','golf','skidåkning','dans','bowling','schack','leksak','docka','fjäril',
-        'bi','myra','orm','groda','ekorre','hamster','marsvin','ros','tulpan','solros',
-        'paraply','nyckel','lampa','matta','kudde','garderopp','spis','diskho','soppa','pannkaka',
+        'hockey','basket','golf','skidåkning','bowling','schack','leksak','docka','fjäril','bi',
+        'myra','ekorre','hamster','marsvin','ros','tulpan','solros','paraply','matta','garderob',
+        'spis','diskho','soppa','pannkaka',
       ],
       medium: [
-        'restaurang','bibliotek','museum','teater','konsert','sjukhus','apotek','brandstation',
-        'polisstation','flygplats','hamn','torg','galleria','bio','cirkus','djurpark',
-        'laboratorium','observatorium','ambassad','rådhus','domstol','fängelse','palats','slott',
-        'tempel','moské','katedral','stadion','arena','gymnasium','simhall','ishall',
-        'skidbacke','campingplats','vandrarhem','hotell','paraply','teleskop','mikroskop','kompass',
-        'kikare','termometer','barometer','helikopter','ubåt','rymdskepp','luftballong','skateboard',
-        'motorcykel','traktor','grävmaskin','bulldozer','ambulans','brandbil','skolbuss',
-        'bokhylla','skrivbord','projektor','häftapparat','papperskorg','tangentbord',
-        'pekskärm','smartklocka','hörlurar','mikrofon','högtalare','kamera','skrivare',
-        'fotografi','semester','tidning','tidskrift','orkester','symfoni',
-        'geografi','biologi','kemi','fysik','historia','filosofi','psykologi','sociologi',
-        'ekonomi','juridik','medicin','arkitektur','litteratur','poesi','drama','komedi',
-        'tragedi','musical','opera','balett','film','animation','datorspel','podcast','blogg',
-        'marknadsföring','försäljning','ledarskap','teamwork','projekt','deadline','budget',
-        'solcell','vindmölla','vattenfall','tsunami','jordbävning','vulkan','tornado','orkan',
-        'akvarell','oljemålning','skulptur','collage','graffiti','expedition','navigation',
-        'vaccination','allergi','diagnos','operation','rehabilitering','botanisk trädgård',
-        'nationalpark','akvarium','planetarium','konferenscentrum',
+        'restaurang','bibliotek','museum','teater','konsert','sjukhus','apotek','brandstation','polisstation','flygplats',
+        'hamn','torg','galleria','bio','cirkus','djurpark','laboratorium','observatorium','ambassad','rådhus',
+        'domstol','fängelse','palats','slott','tempel','moské','katedral','stadion','arena','gymnasium',
+        'simhall','ishall','skidbacke','campingplats','vandrarhem','hotell','teleskop','mikroskop','kompass','kikare',
+        'termometer','barometer','helikopter','ubåt','rymdskepp','luftballong','skateboard','motorcykel','traktor','grävmaskin',
+        'bulldozer','ambulans','brandbil','skolbuss','bokhylla','skrivbord','projektor','häftapparat','papperskorg','tangentbord',
+        'pekskärm','smartklocka','hörlurar','mikrofon','högtalare','kamera','skrivare','fotografi','semester','tidning',
+        'tidskrift','orkester','symfoni','geografi','biologi','kemi','fysik','historia','filosofi','psykologi',
+        'sociologi','ekonomi','juridik','medicin','arkitektur','litteratur','poesi','drama','komedi','tragedi',
+        'musical','opera','balett','film','animation','datorspel','podcast','blogg','marknadsföring','försäljning',
+        'ledarskap','teamwork','projekt','deadline','budget','solcell','vindmölla','vattenfall','tsunami','jordbävning',
+        'vulkan','tornado','orkan','akvarell','oljemålning','skulptur','collage','graffiti','expedition','navigation',
+        'vaccination','allergi','diagnos','operation','rehabilitering','botanisk trädgård','nationalpark','akvarium','planetarium','konferenscentrum',
       ],
       hard: [
-        'existentiell','paradox','metafor','allegori','infrastruktur','demokrati',
-        'byråkrati','globalisering','hållbarhet','innovation','konstitution','meditation',
-        'perception','perspektiv','abstraktion','antagonism','arkeologi','civilisation',
-        'demagogi','ekosystem','evolution','federation','hierarki','ideologi',
-        'logaritm','manifestation','neurologi','oligarki','retorik','revolution',
-        'xenofobi','zoologi','anomali','antropologi','dialektik',
-        'diskrepans','eklekticism','fenomenologi','fundamentalism','genealogi',
-        'hermeneutik','kognition','lingvistik','manipulation','narcissism',
-        'ontologi','paradigmskifte','kvantmekanik','semiotik','totalitarism','ambivalens',
-        'cynicism','dualism','empati','fördom','hegemoni','imperialism',
-        'jantelagen','karisma','nihilism','opportunism','paternalism',
-        'relativism','skepticism','tribalism','universalism','absolutism',
-        'alienation','determinism','empiricism','fatalism','humanism',
-        'idealism','liberalism','materialism','pragmatism','rationalism',
-        'stoicism','transcendens','utilitarism','epistemologi','axiom',
-        'tautologi','syllogism','kausalitet','korrelation','sannolikhet',
-        'entropi','homeostas','symbiosis','parasitism','kommensalism',
-        'gentrification','sekularisering','urbanisering','industrialisering','digitalisering',
-        'intermedialitet','intertextualitet','dekonstruktion','postkolonialism','feminism',
-        'prokrastinering','resiliens','dissociation','kognitiv dissonans','gaslighting',
-        'neuroplasticitet','metakognition','intersektionalitet','normativitet','etnocentrism',
+        'existentiell','paradox','metafor','allegori','infrastruktur','demokrati','byråkrati','globalisering','hållbarhet','innovation',
+        'konstitution','meditation','perception','perspektiv','abstraktion','antagonism','arkeologi','civilisation','demagogi','ekosystem',
+        'evolution','federation','hierarki','ideologi','logaritm','manifestation','neurologi','oligarki','retorik','revolution',
+        'xenofobi','zoologi','anomali','antropologi','dialektik','diskrepans','eklekticism','fenomenologi','fundamentalism','genealogi',
+        'hermeneutik','kognition','lingvistik','manipulation','narcissism','ontologi','paradigmskifte','kvantmekanik','semiotik','totalitarism',
+        'ambivalens','cynicism','dualism','empati','fördom','hegemoni','imperialism','jantelagen','karisma','nihilism',
+        'opportunism','paternalism','relativism','skepticism','tribalism','universalism','absolutism','alienation','determinism','empiricism',
+        'fatalism','humanism','idealism','liberalism','materialism','pragmatism','rationalism','stoicism','transcendens','utilitarism',
+        'epistemologi','axiom','tautologi','syllogism','kausalitet','korrelation','sannolikhet','entropi','homeostas','symbios',
+        'parasitism','kommensalism','gentrifiering','sekularisering','urbanisering','industrialisering','digitalisering','intermedialitet','intertextualitet','dekonstruktion',
+        'postkolonialism','feminism','prokrastinering','resiliens','dissociation','kognitiv dissonans','gaslighting','neuroplasticitet','metakognition','intersektionalitet',
+        'normativitet','etnocentrism',
       ],
       barn: [
         'skateboard','pizza','robot','magi','haj','vulkan','labyrint','rymdskepp','ninja','pirat',
@@ -1342,24 +1209,22 @@ const WORDS = {
       ],
       medium: [
         'schimpans','orangutang','gepard','leopard','jaguar','lodjur','hyena','gnu','impala','gasell',
-        'albatross','pelikan','kolibri','tukan','kondor','pingvin','havssköldpadda','kobra','pytonorm','kameleon',
-        'axolotl','platypus','bilby','tardigrade','myrslok','tapir','okapi','binturong','fossa','markatta',
-        'valross','narval','blåval','kaskelot','manatee','dugong','sjöhäst','mannaray','hammerhead','barracuda',
-        'termit','syrsa','trollslända','myrlejont','bäver','mård','iller','grävling','järv','ren',
+        'albatross','pelikan','kolibri','tukan','kondor','havssköldpadda','kobra','pytonorm','kameleon','axolotl',
+        'näbbdjur','bilby','björndjur','myrslok','tapir','okapi','binturong','fossa','markatta','valross',
+        'narval','blåval','kaskelot','manat','dugong','sjöhäst','mantarocka','hammarhaj','barrakuda','termit',
+        'syrsa','trollslända','myrlejont','bäver','mård','iller','grävling','järv','ren',
       ],
       hard: [
-        'quetzal','axolotl','okapi','binturong','fossa','tasmansk djävul','wombat','echidna','numbat','quoll',
-        'pangolin','aardvark','aardwolf','dugong','manatee','capybara','tapir','vicuña','markhor','saola',
-        'aye-aye','tarsier','loris','galago','colugo','tupai','feneräv','fennek','serval','caracal',
-        'gemsbok','kudu','sable','nyala','waterbuck','reedbok','dikdik','steenbok','oryx','addax',
-        'lyrebird','kakapo','kea','kokako','takahe','weka','cassowary','kiwi','bowerbird','riflebird',
+        'praktquetzal','pungdjävul','wombat','echidna','pangolin','aardvark','capybara','vicuña','markhor','saola',
+        'tarsier','loris','ökenräv','serval','caracal','gemsbok','kudu','sable','nyala','waterbuck',
+        'steenbok','oryx','addax','kasuar','kiwi',
       ],
       barn: [
         'haj','delfin','isbjörn','gepard','gorilla','känguru','koala','flamingo','pingvin','örn',
-        'uggla','fladdermus','varg','räv','flodhäst','näshörning','krokodil','sköldpadda','bläckfisk','manet',
+        'uggla','fladdermus','varg','räv','flodhäst','noshörning','krokodil','sköldpadda','bläckfisk','manet',
         'papegoja','kobra','kameleon','piranha','skallerorm','tarantula','skorpion','myrslok','tapir','panda',
-        'snöleopard','ozelot','lodjur','bison','älg','valross','narval','mannaray','komododrake','pelikan',
-        'sjöhäst','hammerhead','baracuda','tumlare','späckhuggare','bäver','järv','mård','iller','grävling',
+        'snöleopard','ozelot','lodjur','bison','älg','valross','narval','mantarocka','komododrake','pelikan',
+        'sjöhäst','hammarhaj','barrakuda','tumlare','späckhuggare','bäver','järv','mård','iller','grävling',
       ],
     },
     mat: {
@@ -1378,11 +1243,10 @@ const WORDS = {
         'kimchi','sauerkraut','kombucha','kefir','lassi','chai','matcha','espresso','latte','cappuccino',
       ],
       hard: [
-        'bouillabaisse','coq au vin','beef bourguignon','osso buco','vitello tonnato','saltimbocca','pappardelle al cinghiale',
-        'brandade de morue','cassoulet','ratatouille','vichyssoise','pot-au-feu','chateaubriand','beurre blanc',
-        'amuse-bouche','mise en place','deglazering','emulgering','karamellisering','blanquette','confit','jus lié',
-        'maillardreaktion','osmotisk tillagning','sous vide','fermentering','gelning','spherification','emulsion',
-        'terroir','umami','astringent','tanninrik','cuvée','degustation','sommelier','charcuterie','fromage affiné','cave à vin',
+        'bouillabaisse','coq au vin','beef bourguignon','osso buco','vitello tonnato','saltimbocca','pappardelle al cinghiale','brandade de morue','cassoulet','ratatouille',
+        'vichyssoise','pot-au-feu','chateaubriand','beurre blanc','amuse-bouche','mise en place','deglazering','emulgering','karamellisering','blanquette',
+        'confit','jus lié','maillardreaktion','osmotisk tillagning','sous vide','fermentering','gelning','spherification','emulsion','terroir',
+        'umami','astringent','tanninrik','cuvée','degustation','sommelier','charcuterie','fromage affiné','cave à vin',
       ],
       barn: [
         'pizza','hamburgare','tacos','sushi','pasta','glass','pannkakor','våfflor','nachos','smoothie',
@@ -1398,18 +1262,18 @@ const WORDS = {
         'bowling','frisbee','badminton','pingpong','klättring','ridning','boxning','brottning','karate','judo',
         'handboll','innebandy','volleyboll','vattenpolo','rodd','segling','surfing','skateboard','snowboard','längdskidor',
         'hopprep','gympa','yoga','pilates','aerobics','crossfit','orientering','boule','curling','fäktning',
-        'arkebågsskytte','skytte','triathlon','duathlon','pentathlon','friidrott','stavhopp','spjutkastning','kulstötning','diskuskastning',
+        'bågskytte','skytte','triathlon','duathlon','pentathlon','friidrott','stavhopp','spjutkastning','kulstötning','diskuskastning',
       ],
       medium: [
-        'padel','pickleball','lacrosse','rugby','amerikansk fotboll','cricket','baseball','softball','polo','pferdesport',
-        'kanot','kajak','forsränning','fallskärmshoppning','bergsbestigning','speleologi','bungyjump','parasailing','vindsurfing','kitesurfing',
-        'stockbil','rally','motocross','speedway','karting','bandy','floorball','rinkbandy','ishockey','konståkning',
-        'konstsimning','vattenskidor','wakeboard','dykare','triatlet','biathlon','skidskytte','slalom','storslalom','super-G',
-        'parkour','calisthenics','strongman','powerlifting','tyngdlyftning','brottning','sambo','taekwondo','aikido','sumo',
+        'padel','pickleball','lacrosse','rugby','amerikansk fotboll','cricket','baseball','softball','polo','kanot',
+        'kajak','forsränning','fallskärmshoppning','bergsbestigning','speleologi','bungyjump','parasailing','vindsurfing','kitesurfing','stockbil',
+        'rally','motocross','speedway','karting','bandy','floorball','rinkbandy','ishockey','konståkning','konstsimning',
+        'vattenskidor','wakeboard','dykare','triatlet','biathlon','skidskytte','slalom','storslalom','super-G','parkour',
+        'calisthenics','strongman','powerlifting','tyngdlyftning','sambo','taekwondo','aikido','sumo',
       ],
       hard: [
         'häcklöpning','tresteg','tiokamp','sjukamp','modern femkamp','konstskytte','hjälm-pistol','épée','fleuret','sabel',
-        'sculling','coxless four','cox eight','ergometer','plyometrics','proprioception','kinesiologi','biomeknik','periodisering','periostit',
+        'sculling','coxless four','cox eight','ergometer','plyometrics','proprioception','kinesiologi','biomekanik','periodisering','periostit',
         'laktattröskel','VO2max','anaerob tröskel','cardiorespiratorisk','sportpsykologi','idrottsnutrition','dopingkontroll','anti-doping','WADA','CAS',
         'teknisk regelöverträdelse','offsideregeln','handikappsystem','handicap','scratch','stableford','matchplay','strokeplay','bogey','eagle',
         'pressing','gegenpressing','tiki-taka','catenaccio','sweeper','libero','regista','trequartista','raumdeuter','spielmacher',
@@ -1427,8 +1291,8 @@ const WORDS = {
         'sol','måne','stjärna','moln','regn','snö','vind','eld','is','åska',
         'blixt','regnbåge','hav','sjö','flod','berg','skog','äng','ö','öken',
         'strand','klippa','grotta','vattenfall','dimma','frost','hagel','blomma','träd','gräs',
-        'mossa','kaktus','palm','löv','sand','jord','sten','sol','halvmåne','natt',
-        'solnedgång','soluppgång','horisont','himmel','moln','storm','tornado','orkan','tsunami','jordbävning',
+        'mossa','kaktus','palm','löv','sand','jord','sten','halvmåne','natt','solnedgång',
+        'soluppgång','horisont','himmel','storm','tornado','orkan','tsunami','jordbävning',
       ],
       medium: [
         'fjärd','skärgård','kustlinje','vattendrag','bäck','å','älv','delta','mynning','estuarium',
@@ -1438,18 +1302,18 @@ const WORDS = {
         'erosion','vittring','sediment','tektonisk rörelse','jordskorpa','mantel','inre kärna','yttre kärna','berggrunden','jordmån',
       ],
       hard: [
-        'fotosyntes','klorofyll','transpiration','aerob respiration','anaerob respiration','kvävefixering','koldioxidcykeln','vattencykeln','fosforcykeln',
-        'successionsekologi','klimaxsamhälle','biotop','biom','ekotone','nischseparation','konkurrensuteslutning','predator-bytesdjur-dynamik',
-        'trofisk kaskad','keystone species','invasiv art','endemisk art','relikt','glaciärretreat','permafrost','albedoeffekt',
-        'termohalin cirkulation','El Niño','La Niña','Hadleycell','jetstream','coriolis effekt','adiabatisk kylning','dew point',
-        'lichens','mykorrhiza','saprofyt','epifyt','parasitväxt','hemiparasit','myrmekofil','zoofil pollination','anemofil','entomofil',
+        'fotosyntes','klorofyll','transpiration','aerob respiration','anaerob respiration','kvävefixering','koldioxidcykeln','vattencykeln','fosforcykeln','successionsekologi',
+        'klimaxsamhälle','biotop','biom','ekotone','nischseparation','konkurrensuteslutning','predator-bytesdjur-dynamik','trofisk kaskad','nyckelart','invasiv art',
+        'endemisk art','relikt','glaciärretreat','permafrost','albedoeffekt','termohalin cirkulation','El Niño','La Niña','Hadleycell','jetstream',
+        'coriolis effekt','adiabatisk kylning','daggpunkt','lavar','mykorrhiza','saprofyt','epifyt','parasitväxt','hemiparasit','myrmekofil',
+        'zoofil pollinering','anemofil','entomofil',
       ],
       barn: [
         'vulkan','tsunami','tornado','norrsken','regnskog','öken','vattenfall','lavin','orkan','jordbävning',
         'solförmörkelse','meteorit','regnbåge','åskoväder','blixt','hagel','dimma','snöstorm','isberg','korallrev',
         'glaciär','canyon','fjord','geyser','savann','tundra','mangrove','delta','krater','atoll',
-        'meteor','komet','asteroid','tidvatten','djungel','regnskur','frost','norrsken','aurora','vulkanutbrott',
-        'jordbävning','flodvåg','öken','saltsjö','arktis','antarktis','tropikerna','ekvatorn','polcirkeln','taiga',
+        'meteor','komet','asteroid','tidvatten','djungel','regnskur','frost','aurora','vulkanutbrott','flodvåg',
+        'saltsjö','arktis','antarktis','tropikerna','ekvatorn','polcirkeln','taiga',
       ],
     },
     yrken: {
@@ -1457,63 +1321,50 @@ const WORDS = {
         'läkare','lärare','kock','polis','brandman','sjuksköterska','frisör','snickare','elektriker','bagare',
         'busschaufför','sopåkare','postbud','pilot','astronaut','journalist','skådespelare','musiker','målare','fotograf',
         'bibliotekarie','veterinär','tandläkare','apotekare','arkitekt','ingenjör','programmerare','designer','advokat','domare',
-        'bonde','fiskare','byggarbetare','rörläggare','mekaniker','bilmekaniker','frisör','massör','nagelteknolog','städare',
-        'vakt','tolk','guide','reseledare','flygvärdinna','kaptén','lots','tulltjänsteman','gränspolisen','tullare',
+        'bonde','fiskare','byggarbetare','rörläggare','mekaniker','bilmekaniker','massör','nagelteknolog','städare','vakt',
+        'tolk','guide','reseledare','flygvärdinna','kaptén','lots','tulltjänsteman','gränspolisen','tullare',
       ],
       medium: [
         'neurokirurg','hjärtspecialist','onkolog','psykiater','geriatriker','neonatolog','anestesiolog','radiolog','patolog','forensiker',
-        'processingenjör','kärningenjör','luft- och rymdingenjör','konstruktör','mekatronik','systemarkitekt','datavetare','cybersäkerhetsexpert',
-        'kvantfysiker','astrofysiker','kosmolog','geologe','geofysiker','oceanograf','meteorolog','klimatforskare',
-        'kulturantropolog','arkeolog','lingvist','semiotiker','numismatiker','heraldiker','genealog','diplomathistoriker',
-        'sommelière','pâtissier','charcutier','boulanger','fromager','caviste','maître d','concierge','butlertjänst',
+        'processingenjör','kärnkraftingenjör','luft- och rymdingenjör','konstruktör','mekatronik','systemarkitekt','datavetare','cybersäkerhetsexpert','kvantfysiker','astrofysiker',
+        'kosmolog','geolog','geofysiker','oceanograf','meteorolog','klimatforskare','kulturantropolog','arkeolog','lingvist','semiotiker',
+        'numismatiker','heraldiker','genealog','diplomathistoriker','sommelière','pâtissier','charcutier','boulanger','fromager','caviste',
+        'maître d','concierge','butlertjänst',
       ],
       hard: [
-        'aktuarie','kvantanalytiker','riskmodellör','derivathandlare','hedgefondförvaltare','portföljstrateg','makroekonom','beteendeekonom',
-        'neuroekonom','spelteorispecialist','komplexitetsekonom','institutionell ekonom',
-        'epigenomiker','proteomikforskare','metagenomiker','bioinformatiker','syntetisk biolog','bioetiker',
-        'rättsfilosof','konstitutionalistekspert','folkrättsjurist','arbitragespecialist','investeringsarbitrageadvocat',
-        'diplomatisk analytiker','geopolitisk strateg','säkerhetspolitisk rådgivare','underrättelseanalytiker',
-        'kybernetiksexpert','transhumanistisk filosof','teknologietiker','AI-säkerhetsforskare','alignment-forskare',
+        'aktuarie','kvantanalytiker','riskmodellör','derivathandlare','hedgefondförvaltare','portföljstrateg','makroekonom','beteendeekonom','neuroekonom','spelteorispecialist',
+        'komplexitetsekonom','institutionell ekonom','epigenomiker','proteomikforskare','metagenomiker','bioinformatiker','syntetisk biolog','bioetiker','rättsfilosof','konstitutionalistekspert',
+        'folkrättsjurist','arbitragespecialist','investeringsarbitrageadvocat','diplomatisk analytiker','geopolitisk strateg','säkerhetspolitisk rådgivare','underrättelseanalytiker','kybernetiksexpert','transhumanistisk filosof','teknologietiker',
+        'AI-säkerhetsforskare','alignment-forskare',
       ],
       barn: [
         'astronaut','brandman','polis','läkare','pilot','kock','youtuber','veterinär','lärare','konstnär',
         'musiker','skådespelare','journalist','detektiv','magiker','cirkusartist','fotbollsspelare','frisör','tandläkare','arkitekt',
         'ingenjör','dansare','simmare','boxare','programmerare','speldesigner','streamer','tränare','livräddare','bergsklättrare',
-        'djurskötare','apotekare','räddningsdykare','naturguide','zookeeper','stuntman','matrecensent','sportkommentator','influencer','esportare',
-        'barnläkare','illustratör','animatör','spelutgivare','robotingenjör','rymdforskar','filmregissör','spelproducent','youtuber','tiktoker',
+        'djurskötare','apotekare','räddningsdykare','naturguide','stuntman','matrecensent','sportkommentator','influencer','esportare','barnläkare',
+        'illustratör','animatör','spelutgivare','robotingenjör','rymdforskare','filmregissör','spelproducent','tiktoker',
       ],
     },
     meningar: {
       easy: [
-        'sova som en stock','snabb som blixten','stark som en björn','tyst som en mus','glad som en lärka',
-        'hungrig som en varg','trött som ett lik','varm som solen','kall som is','ljus som dagen',
-        'mörk som natten','ren som ett samvete','hård som sten','mjuk som bomull','söt som honung',
-        'skratta hela vägen till banken','regnets dag','solens dag','havets brus','vindens sus',
-        'hänga med läppen','ha fjärilar i magen','se ljuset i tunneln','vara på molnet','ha tur i oturen',
-        'gå som på räls','falla på plats','ta det lugnt','ge järnet','kämpa på',
+        'sova som en stock','snabb som blixten','stark som en björn','tyst som en mus','glad som en lärka','hungrig som en varg','trött som ett lik','varm som solen','kall som is','ljus som dagen',
+        'mörk som natten','ren som ett samvete','hård som sten','mjuk som bomull','söt som honung','skratta hela vägen till banken','regnets dag','solens dag','havets brus','vindens sus',
+        'hänga med läppen','ha fjärilar i magen','se ljuset i tunneln','vara på molnet','ha tur i oturen','gå som på räls','falla på plats','ta det lugnt','ge järnet','kämpa på',
       ],
       medium: [
-        'köpa grisen i säcken','ta bladet från munnen','sätta käppar i hjulet','kasta yxan i sjön',
-        'slå två flugor i en smäll','ta tjuren vid hornen','ha många järn i elden','bita i det sura äpplet',
-        'kasta pärlor för svin','riva upp gammal ost','bränna sina skepp','vinna på kort','följa med strömmen',
-        'gå som katten kring het gröt','ha rent mjöl i påsen','inte sälja skinnet innan björnen är skjuten',
-        'lägga loppan i öronen','vinna slaget men förlora kriget','ha ögon i nacken','bita ihop tänderna',
-        'dra öronen åt sig','hålla tummarna','lägga korten på bordet','spela högt spel','ta bladet från munnen',
+        'köpa grisen i säcken','ta bladet från munnen','sätta käppar i hjulet','kasta yxan i sjön','slå två flugor i en smäll','ta tjuren vid hornen','ha många järn i elden','bita i det sura äpplet','kasta pärlor för svin','riva upp gamla sår',
+        'bränna sina skepp','ha trumf på hand','följa med strömmen','gå som katten kring het gröt','ha rent mjöl i påsen','inte sälja skinnet innan björnen är skjuten','lägga loppan i öronen','vinna slaget men förlora kriget','ha ögon i nacken','bita ihop tänderna',
+        'dra öronen åt sig','hålla tummarna','lägga korten på bordet','spela högt spel',
       ],
       hard: [
-        'Caesars hustru måste vara över alla misstankar','ett nödvändigt ont','pyrrhusseger','moment 22',
-        'det är mörkt innan gryningen','Roma locuta causa finita','vox populi vox dei','memento mori',
-        'carpe diem','in medias res','deus ex machina','ex cathedra','sine qua non','status quo',
-        'entre nous','c\'est la vie','schadenfreude','weltanschauung','zeitgeist','realpolitik',
-        'gordisk knut','Akilleshäl','trojan häst','pandoras ask','sisyfosarbete','tantalusplågor',
-        'pyrrhusseger','epikuréiskt lugn','sokratisk metod','platonisk kärlek',
+        'Caesars hustru måste vara över alla misstankar','ett nödvändigt ont','pyrrhusseger','moment 22','det är mörkt innan gryningen','Roma locuta causa finita','vox populi vox dei','memento mori','carpe diem','in medias res',
+        'deus ex machina','ex cathedra','sine qua non','status quo','entre nous','c\'est la vie','schadenfreude','weltanschauung','zeitgeist','realpolitik',
+        'gordisk knut','Akilleshäl','trojansk häst','pandoras ask','sisyfosarbete','tantalusplågor','epikuréiskt lugn','sokratisk metod','platonisk kärlek',
       ],
       barn: [
-        'ha kul','bästa kompisen','spela spel','titta på YouTube','äta glass','åka på semester',
-        'ha födelsedag','öppna presenter','gå på bio','spela fotboll','pyjamas-dag','titta på film',
-        'åka berg-och-dalbana','halloweenfest','klä ut sig','leka kurragömma','bygga med lego','rita och måla',
-        'cykla fort','simma under vattnet','hoppa studsmatta','spela Minecraft','ha slumber party','lösa en gåta',
-        'hitta en skatt','flyga drake','baka kakor','laga mat','läsa serier','samla kort',
+        'ha kul','bästa kompisen','spela spel','titta på YouTube','äta glass','åka på semester','ha födelsedag','öppna presenter','gå på bio','spela fotboll',
+        'pyjamas-dag','titta på film','åka berg-och-dalbana','halloweenfest','klä ut sig','leka kurragömma','bygga med lego','rita och måla','cykla fort','simma under vattnet',
+        'hoppa studsmatta','spela Minecraft','ha slumber party','lösa en gåta','hitta en skatt','flyga drake','baka kakor','laga mat','läsa serier','samla kort',
         'spela rollspel','bygga en koja','läsa bok i mörkret','titta på stjärnorna','gå på äventyr',
       ],
     },
@@ -1524,63 +1375,49 @@ const WORDS = {
       easy: [
         'ball','dog','cat','car','bike','sun','moon','chair','table','phone',
         'food','water','book','music','dance','school','house','tree','flower','fish',
-        'bird','ice cream','coffee','pizza','train','bus','boat','plane','letter',
-        'store','park','beach','mountain','lake','river','rain','snow','wind','fire',
-        'ice','gold','apple','banana','strawberry','carrot','potato','bread','milk','cheese',
-        'egg','butter','chicken','foot','hand','eye','nose','mouth','ear','head',
-        'arm','leg','heart','hair','tooth','finger','watch','ring','jacket','pants',
-        'skirt','dress','shoes','bag','key','lamp','window','door','bed','sofa',
-        'pillow','mirror','shower','kitchen','oven','fridge','computer','tv','radio','guitar',
-        'piano','drum','pencil','scissors','glue','paper','forest','ocean','horse','cow',
-        'pig','sheep','duck','rabbit','snake','frog','lion','tiger','elephant','giraffe',
-        'penguin','dolphin','whale','bear','fox','wolf','deer','orange','lemon','grape',
-        'melon','mango','pear','plum','cherry','raspberry','cake','cookie','chocolate','candy',
-        'chips','popcorn','hamburger','sushi','taco','football','tennis','swimming','cycling','running',
-        'hockey','basketball','golf','skiing','dancing','bowling','chess','toy','doll','butterfly',
-        'bee','ant','snake','frog','squirrel','hamster','guinea pig','rose','tulip','sunflower',
-        'umbrella','rug','blanket','curtain','garage','garden','basement','attic','porch','chimney',
+        'bird','ice cream','coffee','pizza','train','bus','boat','plane','letter','store',
+        'park','beach','mountain','lake','river','rain','snow','wind','fire','ice',
+        'gold','apple','banana','strawberry','carrot','potato','bread','milk','cheese','egg',
+        'butter','chicken','foot','hand','eye','nose','mouth','ear','head','arm',
+        'leg','heart','hair','tooth','finger','watch','ring','jacket','pants','skirt',
+        'dress','shoes','bag','key','lamp','window','door','bed','sofa','pillow',
+        'mirror','shower','kitchen','oven','fridge','computer','tv','radio','guitar','piano',
+        'drum','pencil','scissors','glue','paper','forest','ocean','horse','cow','pig',
+        'sheep','duck','rabbit','snake','frog','lion','tiger','elephant','giraffe','penguin',
+        'dolphin','whale','bear','fox','wolf','deer','orange','lemon','grape','melon',
+        'mango','pear','plum','cherry','raspberry','cake','cookie','chocolate','candy','chips',
+        'popcorn','hamburger','sushi','taco','football','tennis','swimming','cycling','running','hockey',
+        'basketball','golf','skiing','dancing','bowling','chess','toy','doll','butterfly','bee',
+        'ant','squirrel','hamster','guinea pig','rose','tulip','sunflower','umbrella','rug','blanket',
+        'curtain','garage','garden','basement','attic','porch','chimney',
       ],
       medium: [
-        'restaurant','library','museum','theater','concert hall','hospital','pharmacy','fire station',
-        'police station','airport','harbor','market','mall','cinema','circus','zoo',
-        'laboratory','observatory','embassy','city hall','courthouse','prison','palace','castle',
-        'temple','mosque','cathedral','stadium','arena','gym','swimming pool','ice rink',
-        'ski resort','campsite','hostel','hotel','telescope','microscope','compass',
-        'binoculars','thermometer','barometer','helicopter','submarine','spacecraft',
-        'hot air balloon','skateboard','motorcycle','tractor','excavator','bulldozer',
-        'ambulance','fire truck','school bus','bookshelf','desk','projector','stapler',
-        'keyboard','touchscreen','smartwatch','headphones','microphone','speaker','camera','printer',
-        'photography','vacation','newspaper','magazine','orchestra','symphony',
-        'geography','biology','chemistry','physics','history','philosophy','psychology','sociology',
-        'economics','law','medicine','architecture','literature','poetry','drama','comedy',
-        'tragedy','musical','opera','ballet','film','animation','video game','podcast','blog',
-        'marketing','sales','leadership','teamwork','project','deadline','budget',
-        'solar panel','wind turbine','waterfall','tsunami','earthquake','volcano','tornado','hurricane',
-        'watercolor','sculpture','collage','graffiti','expedition','navigation',
-        'vaccination','allergy','diagnosis','surgery','rehabilitation','botanical garden',
-        'national park','aquarium','planetarium','conference center',
+        'restaurant','library','museum','theater','concert hall','hospital','pharmacy','fire station','police station','airport',
+        'harbor','market','mall','cinema','circus','zoo','laboratory','observatory','embassy','city hall',
+        'courthouse','prison','palace','castle','temple','mosque','cathedral','stadium','arena','gym',
+        'swimming pool','ice rink','ski resort','campsite','hostel','hotel','telescope','microscope','compass','binoculars',
+        'thermometer','barometer','helicopter','submarine','spacecraft','hot air balloon','skateboard','motorcycle','tractor','excavator',
+        'bulldozer','ambulance','fire truck','school bus','bookshelf','desk','projector','stapler','keyboard','touchscreen',
+        'smartwatch','headphones','microphone','speaker','camera','printer','photography','vacation','newspaper','magazine',
+        'orchestra','symphony','geography','biology','chemistry','physics','history','philosophy','psychology','sociology',
+        'economics','law','medicine','architecture','literature','poetry','drama','comedy','tragedy','musical',
+        'opera','ballet','film','animation','video game','podcast','blog','marketing','sales','leadership',
+        'teamwork','project','deadline','budget','solar panel','wind turbine','waterfall','tsunami','earthquake','volcano',
+        'tornado','hurricane','watercolor','sculpture','collage','graffiti','expedition','navigation','vaccination','allergy',
+        'diagnosis','surgery','rehabilitation','botanical garden','national park','aquarium','planetarium','conference center',
       ],
       hard: [
-        'existential','paradox','metaphor','allegory','infrastructure','democracy',
-        'bureaucracy','globalization','sustainability','innovation','constitution','meditation',
-        'perception','perspective','abstraction','antagonism','archaeology','civilization',
-        'demagogy','ecosystem','evolution','federation','hierarchy','ideology',
-        'logarithm','manifestation','neurology','oligarchy','rhetoric','revolution',
-        'xenophobia','zoology','anachronism','anomaly','anthropology','dialectics',
-        'discrepancy','eclecticism','phenomenology','fundamentalism','genealogy',
-        'hermeneutics','cognition','linguistics','manipulation','narcissism',
-        'ontology','paradigm shift','quantum mechanics','semiotics','totalitarianism',
-        'ambivalence','cynicism','dualism','empathy','prejudice','hegemony',
-        'imperialism','charisma','nihilism','opportunism','paternalism',
-        'relativism','skepticism','tribalism','universalism','absolutism',
-        'alienation','determinism','empiricism','fatalism','humanism',
-        'idealism','liberalism','materialism','pragmatism','rationalism',
-        'stoicism','transcendence','utilitarianism','epistemology','axiom',
-        'tautology','syllogism','causality','correlation','probability',
-        'entropy','homeostasis','symbiosis','parasitism','commensalism',
-        'gentrification','secularization','urbanization','industrialization','digitalization',
-        'procrastination','resilience','dissociation','cognitive dissonance','gaslighting',
-        'neuroplasticity','metacognition','intersectionality','normativity','ethnocentrism',
+        'existential','paradox','metaphor','allegory','infrastructure','democracy','bureaucracy','globalization','sustainability','innovation',
+        'constitution','meditation','perception','perspective','abstraction','antagonism','archaeology','civilization','demagogy','ecosystem',
+        'evolution','federation','hierarchy','ideology','logarithm','manifestation','neurology','oligarchy','rhetoric','revolution',
+        'xenophobia','zoology','anachronism','anomaly','anthropology','dialectics','discrepancy','eclecticism','phenomenology','fundamentalism',
+        'genealogy','hermeneutics','cognition','linguistics','manipulation','narcissism','ontology','paradigm shift','quantum mechanics','semiotics',
+        'totalitarianism','ambivalence','cynicism','dualism','empathy','prejudice','hegemony','imperialism','charisma','nihilism',
+        'opportunism','paternalism','relativism','skepticism','tribalism','universalism','absolutism','alienation','determinism','empiricism',
+        'fatalism','humanism','idealism','liberalism','materialism','pragmatism','rationalism','stoicism','transcendence','utilitarianism',
+        'epistemology','axiom','tautology','syllogism','causality','correlation','probability','entropy','homeostasis','symbiosis',
+        'parasitism','commensalism','gentrification','secularization','urbanization','industrialization','digitalization','procrastination','resilience','dissociation',
+        'cognitive dissonance','gaslighting','neuroplasticity','metacognition','intersectionality','normativity','ethnocentrism',
       ],
       barn: [
         'skateboard','pizza','robot','magic','shark','volcano','labyrinth','spaceship','ninja','pirate',
@@ -1601,10 +1438,10 @@ const WORDS = {
       ],
       medium: [
         'chimpanzee','orangutan','cheetah','leopard','jaguar','lynx','hyena','wildebeest','impala','gazelle',
-        'albatross','pelican','hummingbird','toucan','condor','sea turtle','cobra','python','chameleon',
-        'platypus','aardvark','tapir','tamarin','lemur','tarsier','loris',
-        'walrus','narwhal','blue whale','sperm whale','manatee','dugong','seahorse','manta ray','hammerhead','barracuda',
-        'termite','cricket','dragonfly','antlion','beaver','marten','ferret','badger','wolverine','reindeer',
+        'albatross','pelican','hummingbird','toucan','condor','sea turtle','cobra','python','chameleon','platypus',
+        'aardvark','tapir','tamarin','lemur','tarsier','loris','walrus','narwhal','blue whale','sperm whale',
+        'manatee','dugong','seahorse','manta ray','hammerhead','barracuda','termite','cricket','dragonfly','antlion',
+        'beaver','marten','ferret','badger','wolverine','reindeer',
       ],
       hard: [
         'quetzal','axolotl','okapi','binturong','fossa','Tasmanian devil','wombat','echidna','numbat','quoll',
@@ -1637,11 +1474,10 @@ const WORDS = {
         'kimchi','sauerkraut','kombucha','kefir','lassi','chai','matcha','espresso','latte','cappuccino',
       ],
       hard: [
-        'bouillabaisse','coq au vin','beef bourguignon','osso buco','vitello tonnato','saltimbocca','pappardelle al cinghiale',
-        'brandade de morue','cassoulet','ratatouille','vichyssoise','pot-au-feu','chateaubriand','beurre blanc',
-        'amuse-bouche','mise en place','deglazing','emulsification','caramelization','blanquette','confit','jus lié',
-        'Maillard reaction','osmotic cooking','sous vide','fermentation','gelification','spherification','emulsion',
-        'terroir','umami','astringent','tannic','cuvée','degustation','sommelier','charcuterie','aged cheese','wine cellar',
+        'bouillabaisse','coq au vin','beef bourguignon','osso buco','vitello tonnato','saltimbocca','pappardelle al cinghiale','brandade de morue','cassoulet','ratatouille',
+        'vichyssoise','pot-au-feu','chateaubriand','beurre blanc','amuse-bouche','mise en place','deglazing','emulsification','caramelization','blanquette',
+        'confit','jus lié','Maillard reaction','osmotic cooking','sous vide','fermentation','gelification','spherification','emulsion','terroir',
+        'umami','astringent','tannic','cuvée','degustation','sommelier','charcuterie','aged cheese','wine cellar',
       ],
       barn: [
         'pizza','hamburger','tacos','sushi','pasta','ice cream','pancakes','waffles','nachos','smoothie',
@@ -1667,11 +1503,11 @@ const WORDS = {
         'parkour','calisthenics','strongman','powerlifting','weightlifting','sambo','taekwondo','aikido','sumo','capoeira',
       ],
       hard: [
-        'hurdles','steeplechase','decathlon','heptathlon','modern pentathlon','artistic shooting','épée','foil','sabre',
-        'sculling','coxless four','coxed eight','ergometer','plyometrics','proprioception','kinesiology','biomechanics','periodization','periostitis',
-        'lactate threshold','VO2max','anaerobic threshold','cardiorespiratory','sports psychology','sports nutrition','doping control','anti-doping','WADA','CAS',
-        'technical infringement','offside rule','handicap system','scratch','stableford','matchplay','strokeplay','bogey','eagle','albatross',
-        'pressing','gegenpressing','tiki-taka','catenaccio','sweeper','libero','regista','trequartista','raumdeuter','spielmacher',
+        'hurdles','steeplechase','decathlon','heptathlon','modern pentathlon','artistic shooting','épée','foil','sabre','sculling',
+        'coxless four','coxed eight','ergometer','plyometrics','proprioception','kinesiology','biomechanics','periodization','periostitis','lactate threshold',
+        'VO2max','anaerobic threshold','cardiorespiratory','sports psychology','sports nutrition','doping control','anti-doping','WADA','CAS','technical infringement',
+        'offside rule','handicap system','scratch','stableford','matchplay','strokeplay','bogey','eagle','albatross','pressing',
+        'gegenpressing','tiki-taka','catenaccio','sweeper','libero','regista','trequartista','raumdeuter','spielmacher',
       ],
       barn: [
         'football','basketball','tennis','swimming','cycling','skateboard','snowboard','skiing','climbing','horseback riding',
@@ -1691,17 +1527,17 @@ const WORDS = {
       ],
       medium: [
         'fjord','archipelago','coastline','estuary','stream','creek','tributary','delta','mouth','inlet',
-        'glacier','glacial lake','valley','plateau','steppe','savanna','tundra','taiga','tropical rainforest',
-        'coral reef','mangrove','tidal','wetland','bog','fen','peat bog','salt flat','atoll','volcanic island',
-        'northern lights','meteor shower','comet','asteroid','solar storm','solar wind','magnetic field','ozone layer','stratosphere',
-        'erosion','weathering','sediment','tectonic movement','crust','mantle','inner core','outer core','bedrock','soil horizon',
+        'glacier','glacial lake','valley','plateau','steppe','savanna','tundra','taiga','tropical rainforest','coral reef',
+        'mangrove','tidal','wetland','bog','fen','peat bog','salt flat','atoll','volcanic island','northern lights',
+        'meteor shower','comet','asteroid','solar storm','solar wind','magnetic field','ozone layer','stratosphere','erosion','weathering',
+        'sediment','tectonic movement','crust','mantle','inner core','outer core','bedrock','soil horizon',
       ],
       hard: [
-        'photosynthesis','chlorophyll','transpiration','aerobic respiration','anaerobic respiration','nitrogen fixation','carbon cycle','water cycle','phosphorus cycle',
-        'succession ecology','climax community','biotope','biome','ecotone','niche separation','competitive exclusion','predator-prey dynamics',
-        'trophic cascade','keystone species','invasive species','endemic species','relict species','glacial retreat','permafrost','albedo effect',
-        'thermohaline circulation','El Niño','La Niña','Hadley cell','jet stream','Coriolis effect','adiabatic cooling','dew point',
-        'lichen','mycorrhiza','saprophyte','epiphyte','parasitic plant','hemiparasite','myrmecophile','zoophilous pollination','anemophilous','entomophilous',
+        'photosynthesis','chlorophyll','transpiration','aerobic respiration','anaerobic respiration','nitrogen fixation','carbon cycle','water cycle','phosphorus cycle','succession ecology',
+        'climax community','biotope','biome','ecotone','niche separation','competitive exclusion','predator-prey dynamics','trophic cascade','keystone species','invasive species',
+        'endemic species','relict species','glacial retreat','permafrost','albedo effect','thermohaline circulation','El Niño','La Niña','Hadley cell','jet stream',
+        'Coriolis effect','adiabatic cooling','dew point','lichen','mycorrhiza','saprophyte','epiphyte','parasitic plant','hemiparasite','myrmecophile',
+        'zoophilous pollination','anemophilous','entomophilous',
       ],
       barn: [
         'volcano','tsunami','tornado','northern lights','rainforest','desert','waterfall','avalanche','hurricane','earthquake',
@@ -1721,18 +1557,16 @@ const WORDS = {
       ],
       medium: [
         'neurosurgeon','cardiologist','oncologist','psychiatrist','geriatrician','neonatologist','anesthesiologist','radiologist','pathologist','forensic scientist',
-        'process engineer','nuclear engineer','aerospace engineer','structural engineer','mechatronics engineer','systems architect','computer scientist','cybersecurity expert',
-        'quantum physicist','astrophysicist','cosmologist','geologist','geophysicist','oceanographer','meteorologist','climate scientist',
-        'cultural anthropologist','archaeologist','linguist','semiotician','numismatist','herald','genealogist','diplomatic historian',
-        'sommelier','pâtissier','charcutier','boulanger','fromager','maître d','concierge','butler','estate manager','art auctioneer',
+        'process engineer','nuclear engineer','aerospace engineer','structural engineer','mechatronics engineer','systems architect','computer scientist','cybersecurity expert','quantum physicist','astrophysicist',
+        'cosmologist','geologist','geophysicist','oceanographer','meteorologist','climate scientist','cultural anthropologist','archaeologist','linguist','semiotician',
+        'numismatist','herald','genealogist','diplomatic historian','sommelier','pâtissier','charcutier','boulanger','fromager','maître d',
+        'concierge','butler','estate manager','art auctioneer',
       ],
       hard: [
-        'actuary','quantitative analyst','risk modeler','derivatives trader','hedge fund manager','portfolio strategist','macroeconomist','behavioral economist',
-        'neuroeconomist','game theorist','complexity economist','institutional economist',
-        'epigenomics researcher','proteomics researcher','metagenomics researcher','bioinformatician','synthetic biologist','bioethicist',
-        'legal philosopher','constitutional law expert','international law jurist','arbitration specialist','investment arbitrage lawyer',
-        'diplomatic analyst','geopolitical strategist','security policy advisor','intelligence analyst',
-        'cybernetics expert','transhumanist philosopher','technology ethicist','AI safety researcher','alignment researcher',
+        'actuary','quantitative analyst','risk modeler','derivatives trader','hedge fund manager','portfolio strategist','macroeconomist','behavioral economist','neuroeconomist','game theorist',
+        'complexity economist','institutional economist','epigenomics researcher','proteomics researcher','metagenomics researcher','bioinformatician','synthetic biologist','bioethicist','legal philosopher','constitutional law expert',
+        'international law jurist','arbitration specialist','investment arbitrage lawyer','diplomatic analyst','geopolitical strategist','security policy advisor','intelligence analyst','cybernetics expert','transhumanist philosopher','technology ethicist',
+        'AI safety researcher','alignment researcher',
       ],
       barn: [
         'astronaut','firefighter','police officer','doctor','pilot','chef','youtuber','vet','teacher','artist',
@@ -1744,34 +1578,24 @@ const WORDS = {
     },
     meningar: {
       easy: [
-        'sleep like a log','quick as lightning','strong as an ox','quiet as a mouse','happy as a lark',
-        'hungry as a wolf','free as a bird','bright as the sun','cold as ice','dark as night',
-        'clean as a whistle','hard as rock','soft as cotton','sweet as honey','fresh as a daisy',
-        'laugh all the way to the bank','dance in the rain','follow your heart','reach for the stars','make a wish',
-        'feel butterflies','see the light','be on cloud nine','get lucky','take it easy',
-        'go with the flow','fall into place','hit the road','give it your all','keep going',
+        'sleep like a log','quick as lightning','strong as an ox','quiet as a mouse','happy as a lark','hungry as a wolf','free as a bird','bright as the sun','cold as ice','dark as night',
+        'clean as a whistle','hard as rock','soft as cotton','sweet as honey','fresh as a daisy','laugh all the way to the bank','dance in the rain','follow your heart','reach for the stars','make a wish',
+        'feel butterflies','see the light','be on cloud nine','get lucky','take it easy','go with the flow','fall into place','hit the road','give it your all','keep going',
       ],
       medium: [
-        'bite the bullet','beat around the bush','burn your bridges','cut corners','hit the nail on the head',
-        'kill two birds with one stone','let the cat out of the bag','miss the boat','once in a blue moon','pull someone\'s leg',
-        'spill the beans','the ball is in your court','the best of both worlds','under the weather','up in the air',
-        'bite off more than you can chew','break a leg','every cloud has a silver lining','hit the sack','jump on the bandwagon',
+        'bite the bullet','beat around the bush','burn your bridges','cut corners','hit the nail on the head','kill two birds with one stone','let the cat out of the bag','miss the boat','once in a blue moon','pull someone\'s leg',
+        'spill the beans','the ball is in your court','the best of both worlds','under the weather','up in the air','bite off more than you can chew','break a leg','every cloud has a silver lining','hit the sack','jump on the bandwagon',
         'let sleeping dogs lie','no pain no gain','costs an arm and a leg','on thin ice','piece of cake',
       ],
       hard: [
-        'Caesar\'s wife must be above suspicion','necessary evil','Pyrrhic victory','Catch-22',
-        'darkest before the dawn','Roma locuta causa finita','vox populi vox dei','memento mori',
-        'carpe diem','in medias res','deus ex machina','ex cathedra','sine qua non','status quo',
-        'entre nous','c\'est la vie','schadenfreude','weltanschauung','zeitgeist','realpolitik',
-        'Gordian knot','Achilles\' heel','Trojan horse','Pandora\'s box','Sisyphean task','Tantalus torment',
-        'Epicurean calm','Socratic method','Platonic love',
+        'Caesar\'s wife must be above suspicion','necessary evil','Pyrrhic victory','Catch-22','darkest before the dawn','Roma locuta causa finita','vox populi vox dei','memento mori','carpe diem','in medias res',
+        'deus ex machina','ex cathedra','sine qua non','status quo','entre nous','c\'est la vie','schadenfreude','weltanschauung','zeitgeist','realpolitik',
+        'Gordian knot','Achilles\' heel','Trojan horse','Pandora\'s box','Sisyphean task','Tantalus torment','Epicurean calm','Socratic method','Platonic love',
       ],
       barn: [
-        'have fun','best friend','play games','watch YouTube','eat ice cream','go on vacation',
-        'have a birthday','open presents','go to the movies','play football','pajama day','watch a movie',
-        'ride a roller coaster','halloween party','dress up','play hide and seek','build with lego','draw and paint',
-        'ride a bike fast','swim underwater','jump on a trampoline','play Minecraft','have a sleepover','solve a mystery',
-        'find a treasure','fly a kite','bake cookies','cook food','read comics','collect cards',
+        'have fun','best friend','play games','watch YouTube','eat ice cream','go on vacation','have a birthday','open presents','go to the movies','play football',
+        'pajama day','watch a movie','ride a roller coaster','halloween party','dress up','play hide and seek','build with lego','draw and paint','ride a bike fast','swim underwater',
+        'jump on a trampoline','play Minecraft','have a sleepover','solve a mystery','find a treasure','fly a kite','bake cookies','cook food','read comics','collect cards',
         'play board games','build a fort','read in the dark','watch the stars','go on an adventure',
       ],
     },
@@ -1834,17 +1658,28 @@ const S = {
 const EXHAUSTED = '__EXHAUSTED__';
 
 function getGlobalUsed(lang) {
+  const used = new Set();
   try {
     const raw = localStorage.getItem(`mao_used_${lang}`);
-    return new Set(raw ? JSON.parse(raw) : []);
-  } catch { return new Set(); }
+    (raw ? JSON.parse(raw) : []).forEach(word => used.add(String(word).toLowerCase()));
+  } catch {}
+  try {
+    ((MP.lastState?.used_words?.[lang]) || []).forEach(word => used.add(String(word).toLowerCase()));
+  } catch {}
+  return used;
 }
 function markWordUsed(lang, word) {
   if (word === EXHAUSTED) return;
+  const key = word.toLowerCase();
   try {
     const used = getGlobalUsed(lang);
-    used.add(word.toLowerCase());
+    used.add(key);
     localStorage.setItem(`mao_used_${lang}`, JSON.stringify([...used]));
+  } catch {}
+  try {
+    if (MP.supabase && MP.myName) {
+      mpPost('mark_used', { lang, word: key }).catch(() => {});
+    }
   } catch {}
 }
 
@@ -2767,9 +2602,12 @@ function clearStats() {
 function goHome() {
   clearInterval(S.timerTick);
   clearSession();
+  MP.myName = null;
+  MP.roundActive = false;
+  MP.autoJoinTried = true;
+  sessionStorage.removeItem('mao_mp_player');
+  setDeviceOwner(null);
   mpPost('go_home').then(() => {
-    MP.myName = null;
-    sessionStorage.removeItem('mao_mp_player');
     MP.lastVer = -1;
     mpSync();
   });
@@ -2824,6 +2662,8 @@ const MP = {
   lastEventSeq: null,
   notifTimer: null,
   autoJoinTried: false,
+  lastState: null,
+  cloudQueue: Promise.resolve(),
 };
 const DEVICE_GREETING = Math.random() < 0.5 ? 'Skit på dig' : 'Känn lugnet';
 
@@ -2848,6 +2688,7 @@ function mpNewState({ players = [], lang = S.lang, theme = S.theme, timer_on = f
     timer_dur,
     timer_started_at: null,
     round_pts: 0,
+    used_words: { sv: [], en: [] },
     last_event: null,
   };
 }
@@ -2928,6 +2769,17 @@ async function mpCloudPost(action, extra = {}) {
   } else if (action === 'score_event') {
     const seq = (sv.last_event?.seq || 0) + 1;
     sv.last_event = { seq, pts: extra.pts, diff: extra.diff, at: Date.now() };
+  } else if (action === 'mark_used') {
+    const lang = extra.lang === 'en' ? 'en' : 'sv';
+    const word = String(extra.word || '').trim().toLowerCase();
+    if (word) {
+      const usedWords = {
+        sv: Array.isArray(sv.used_words?.sv) ? sv.used_words.sv.slice() : [],
+        en: Array.isArray(sv.used_words?.en) ? sv.used_words.en.slice() : [],
+      };
+      if (!usedWords[lang].includes(word)) usedWords[lang].push(word);
+      sv.used_words = usedWords;
+    }
   } else if (action === 'end_round') {
     const player = sv.players[sv.idx];
     const pts = extra.round_pts || 0;
@@ -2945,6 +2797,7 @@ async function mpCloudPost(action, extra = {}) {
     sv.phase = 'setup';
     sv.claimed_names = [];
     sv.claimed_sessions = {};
+    sv.used_words = { sv: [], en: [] };
   }
 
   const saved = await mpSaveRoom(sv);
@@ -2952,7 +2805,13 @@ async function mpCloudPost(action, extra = {}) {
 }
 
 async function mpPost(action, extra = {}) {
-  if (MP.supabase) return mpCloudPost(action, extra);
+  if (MP.supabase) {
+    const queued = (MP.cloudQueue || Promise.resolve())
+      .catch(() => {})
+      .then(() => mpCloudPost(action, extra));
+    MP.cloudQueue = queued.catch(() => {});
+    return queued;
+  }
   try {
     const r = await fetch('/action', {
       method: 'POST',
@@ -2986,6 +2845,7 @@ async function mpSync() {
 }
 
 function mpHandle(sv) {
+  MP.lastState = sv;
   const modal = document.getElementById('roundModal');
   if (sv.phase === 'setup') MP.autoJoinTried = false;
   if (sv.phase === 'setup' || !MP.myName || !sv.players.includes(MP.myName)) {
