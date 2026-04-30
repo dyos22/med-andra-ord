@@ -1,11 +1,11 @@
 # Med Andra Ord
 
 Svenskt sällskapsspel (Taboo/Alias) som webbapp. Vanilla JS i en enda `index.html`.
-Multiplayer via Supabase Realtime. Deployad på Netlify — push till `main` = live inom ~1 minut.
+Multiplayer via Supabase Realtime. Deployad på GitHub Pages — push till `main` = live efter GitHub Pages-build.
 
 ## Repo
 - `dyos22/med-andra-ord`
-- Live: https://fancy-blini-022ba3.netlify.app
+- Live: https://dyos22.github.io/med-andra-ord/
 
 ## Stack
 - Vanilla JS + HTML + CSS (ingen bundler, inga npm-paket i appen)
@@ -21,7 +21,7 @@ Kör inte `npm test` automatiskt i Codex-miljön om `npm` saknas.
 - Committa och pusha när en uppgift är klar, utan att fråga
 - Snabba fixes: pusha direkt till `main`
 - Större features: feature-branch → merga till `main`
-- Push till `main` triggar automatisk Netlify-deploy
+- Push till `main` triggar automatisk GitHub Pages-deploy
 
 ## Projektstruktur
 - `index.html` — hela appen (spelloik, UI, CSS, multiplayer)
