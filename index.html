@@ -132,6 +132,70 @@
       background: transparent;
       transform: rotate(-1.5deg);
     }
+    .setup-focus {
+      border-width: 2.5px;
+      box-shadow: var(--shadow-blue);
+    }
+    .setup-options {
+      background: var(--paper);
+      border: 2px solid var(--ink);
+      border-radius: 16px;
+      box-shadow: 2px 3px 0 var(--ink);
+      padding: 0;
+      overflow: hidden;
+    }
+    .setup-options summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      color: var(--ink);
+      font-family: var(--font-script);
+      font-size: 1.35rem;
+      font-weight: 700;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+    .setup-options summary::-webkit-details-marker { display: none; }
+    .setup-options summary::after {
+      content: "↓";
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--ink);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--yellow);
+      color: var(--ink);
+      font-family: var(--font-marker);
+      font-size: 1.05rem;
+      box-shadow: 1px 2px 0 var(--ink);
+      transition: transform 0.18s ease;
+    }
+    .setup-options[open] summary::after { transform: rotate(180deg); }
+    .setup-options-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 0 14px 16px;
+    }
+    .setup-options .card {
+      box-shadow: none;
+      transform: none;
+      border-radius: 12px;
+    }
+    .setup-options .card:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    .setup-options .settings-grid {
+      grid-template-columns: 1fr;
+    }
+    .setup-options .setting-pill {
+      min-height: 54px;
+    }
 
     /* LANGUAGE / THEME TOGGLE */
     .toggle-group { display: flex; gap: 8px; border: 0; }
@@ -333,17 +397,17 @@
     }
 
     /* ADVANCED */
-    details summary {
+    details:not(.setup-options) summary {
       cursor: pointer; color: var(--ink-soft); font-size: 1rem;
       padding: 6px 0; user-select: none; list-style: none;
       font-family: var(--font-marker); font-weight: 400;
     }
-    details summary::-webkit-details-marker { display: none; }
-    details summary::before { content: '▸ '; color: var(--pink-deep); font-size: 0.8rem; }
-    details[open] summary::before { content: '▾ '; }
-    details summary:hover { color: var(--ink); }
-    details .adv-inner { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
-    details .adv-inner p { color: var(--ink-soft); font-size: 1rem; line-height: 1.35; font-family: var(--font-script); }
+    details:not(.setup-options) summary::-webkit-details-marker { display: none; }
+    details:not(.setup-options) summary::before { content: '▸ '; color: var(--pink-deep); font-size: 0.8rem; }
+    details:not(.setup-options)[open] summary::before { content: '▾ '; }
+    details:not(.setup-options) summary:hover { color: var(--ink); }
+    details:not(.setup-options) .adv-inner { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+    details:not(.setup-options) .adv-inner p { color: var(--ink-soft); font-size: 1rem; line-height: 1.35; font-family: var(--font-script); }
 
     /* BUTTONS */
     .btn-primary {
@@ -517,6 +581,22 @@
     .word-card.barn::before   { background: #b5e6ff; }
     .word-card.person::before { background: #dcc6ff; }
     .word-card:hover { transform: translate(-1px,-1px) rotate(0deg); }
+    .word-card.unrevealed {
+      cursor: pointer;
+      padding-bottom: 24px;
+    }
+    .word-card.unrevealed:focus-visible {
+      outline: 3px solid var(--blue);
+      outline-offset: 4px;
+    }
+    .word-card.unrevealed::after {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border: 2px dashed rgba(29,26,20,0.16);
+      border-radius: 12px;
+      pointer-events: none;
+    }
 
     .word-card.scored-right {
       background: var(--green); color: var(--paper);
@@ -572,10 +652,21 @@
     .word-card.revealed .word-text { display: flex; }
     .word-hint {
       text-align: center; color: var(--ink-soft); font-size: 1.4rem;
-      padding: 8px 0; cursor: pointer; position: relative; z-index: 2;
+      padding: 18px 8px 14px; cursor: pointer; position: relative; z-index: 2;
       font-family: var(--font-script);
     }
     .word-hint::before { content: "↳ "; color: var(--pink-deep); font-style: normal; }
+    .word-hint::after {
+      content: "";
+      display: block;
+      width: 54px;
+      height: 5px;
+      margin: 10px auto 0;
+      background: var(--yellow);
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      box-shadow: 1px 1px 0 var(--ink);
+    }
     .word-card.revealed .word-hint { display: none; }
 
     /* RIGHT / PASS BUTTONS */
@@ -585,10 +676,10 @@
     .word-card.scored-pass  .card-actions { display: none; }
     .scored-label { display: none; }
     .btn-right {
-      flex: 1; padding: 11px; border: 2px solid var(--ink);
+      flex: 1; min-height: 54px; padding: 13px 11px; border: 2px solid var(--ink);
       border-radius: 12px;
       background: var(--yellow); color: var(--ink);
-      font-weight: 400; font-size: 1.05rem; cursor: pointer;
+      font-weight: 400; font-size: 1.2rem; cursor: pointer;
       transition: transform 0.12s, box-shadow 0.12s;
       font-family: var(--font-marker);
       box-shadow: 2px 3px 0 var(--ink);
@@ -596,10 +687,10 @@
     }
     .btn-right:hover { transform: translate(-1px,-1px) rotate(0deg); }
     .btn-pass {
-      flex: 1; padding: 11px; border: 2px solid var(--ink);
+      flex: 1; min-height: 54px; padding: 13px 11px; border: 2px solid var(--ink);
       border-radius: 12px;
       background: var(--paper); color: var(--ink-soft);
-      font-weight: 400; font-size: 1.05rem; cursor: pointer;
+      font-weight: 400; font-size: 1.2rem; cursor: pointer;
       transition: transform 0.12s, box-shadow 0.12s;
       font-family: var(--font-marker);
       box-shadow: 2px 3px 0 var(--ink);
@@ -609,6 +700,14 @@
 
     /* GAME ACTIONS */
     .game-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+    .btn-danger-subtle {
+      color: var(--pink-deep);
+      background: var(--paper);
+    }
+    .btn-danger-subtle:hover {
+      background: #ffe4ec;
+      color: var(--pink-deep);
+    }
 
     /* ROUND MODAL */
     .modal-backdrop {
@@ -648,6 +747,26 @@
     .modal .pts-label {
       text-align: center; color: var(--ink-soft); font-size: 1.35rem;
       margin-bottom: 22px; font-family: var(--font-script);
+    }
+    .round-highlight {
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      border-radius: 14px;
+      box-shadow: 2px 3px 0 var(--ink);
+      padding: 10px 12px;
+      margin: 0 0 12px;
+      text-align: center;
+      font-family: var(--font-marker);
+      font-size: 1.12rem;
+      line-height: 1.25;
+    }
+    .next-player-note {
+      color: var(--ink-soft);
+      text-align: center;
+      font-family: var(--font-script);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: -4px 0 16px;
     }
     .standings { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
     .standing-row {
@@ -816,6 +935,30 @@
       font-size: 1.15rem; color: var(--ink-soft); margin-top: 10px;
       font-family: var(--font-script);
     }
+    .wait-card {
+      text-align: center;
+      padding: 24px 18px;
+    }
+    .wait-card .wait-kicker {
+      font-family: var(--font-marker);
+      color: var(--ink-soft);
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+    .wait-card .wait-main {
+      font-family: var(--font-script);
+      font-weight: 700;
+      font-size: 1.7rem;
+      color: var(--blue);
+      line-height: 1.1;
+    }
+    .wait-card .wait-sub {
+      font-family: var(--font-marker);
+      color: var(--ink-soft);
+      font-size: 1rem;
+      margin-top: 8px;
+      line-height: 1.35;
+    }
 
     /* TOAST */
     .toast {
@@ -871,59 +1014,64 @@
     </div>
   </div>
 
-  <!-- Settings -->
-  <div class="card settings-card">
-    <div class="card-label" id="lblSettings">Inställningar</div>
-    <div class="settings-grid">
-      <div class="setting-pill">
-        <span class="setting-name sr-only" id="lblLang">Språk</span>
-        <div class="toggle-group lang-toggle" aria-label="Välj språk">
-          <button class="toggle-btn lang-flag active" id="btnSv" onclick="setLang('sv',this)" aria-label="Svenska" title="Svenska">🇸🇪</button>
-          <button class="toggle-btn lang-flag"        id="btnEn" onclick="setLang('en',this)" aria-label="English" title="English">🇬🇧</button>
-        </div>
-      </div>
-
-      <div class="setting-pill">
-        <div class="switch-row">
-          <span class="setting-name" id="lblBarnMode">Barnläge</span>
-          <label class="switch" aria-label="Barnläge">
-            <input type="checkbox" id="barnToggle" onchange="onBarnToggle()">
-            <div class="switch-track"></div>
-            <div class="switch-thumb"></div>
-          </label>
-        </div>
-      </div>
-
-      <div class="setting-pill timer-setting">
-        <div class="switch-row">
-          <span class="setting-name" id="lblTimer">Timer</span>
-          <label class="switch" aria-label="Timer">
-            <input type="checkbox" id="timerToggle" onchange="onTimerToggle()">
-            <div class="switch-track"></div>
-            <div class="switch-thumb"></div>
-          </label>
-        </div>
-        <div class="timer-seconds" id="timerSecondsGroup">
-          <input type="number" id="timerSeconds" value="60" min="5" max="600" aria-label="Sekunder">
-          <span id="lblSek">sek</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Theme -->
-  <div class="card">
-    <div class="card-label" id="lblTheme">Tema</div>
-    <div class="theme-grid" id="themeGrid"></div>
-  </div>
-
   <!-- Players -->
-  <div class="card">
+  <div class="card setup-focus">
     <div class="card-label" id="lblPlayers">Spelare</div>
     <div id="presetPlayers" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
     <div class="player-list" id="playerList"></div>
     <button class="btn-add" id="addPlayerBtn" onclick="addPlayer()">+ Lägg till gäst</button>
   </div>
+
+  <details class="setup-options" id="setupOptions">
+    <summary id="setupOptionsSummary">Tema & inställningar</summary>
+    <div class="setup-options-inner">
+      <!-- Theme -->
+      <div class="card">
+        <div class="card-label" id="lblTheme">Tema</div>
+        <div class="theme-grid" id="themeGrid"></div>
+      </div>
+
+      <!-- Settings -->
+      <div class="card settings-card">
+        <div class="card-label" id="lblSettings">Inställningar</div>
+        <div class="settings-grid">
+          <div class="setting-pill">
+            <span class="setting-name sr-only" id="lblLang">Språk</span>
+            <div class="toggle-group lang-toggle" aria-label="Välj språk">
+              <button class="toggle-btn lang-flag active" id="btnSv" onclick="setLang('sv',this)" aria-label="Svenska" title="Svenska">🇸🇪</button>
+              <button class="toggle-btn lang-flag"        id="btnEn" onclick="setLang('en',this)" aria-label="English" title="English">🇬🇧</button>
+            </div>
+          </div>
+
+          <div class="setting-pill">
+            <div class="switch-row">
+              <span class="setting-name" id="lblBarnMode">Barnläge</span>
+              <label class="switch" aria-label="Barnläge">
+                <input type="checkbox" id="barnToggle" onchange="onBarnToggle()">
+                <div class="switch-track"></div>
+                <div class="switch-thumb"></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-pill timer-setting">
+            <div class="switch-row">
+              <span class="setting-name" id="lblTimer">Timer</span>
+              <label class="switch" aria-label="Timer">
+                <input type="checkbox" id="timerToggle" onchange="onTimerToggle()">
+                <div class="switch-track"></div>
+                <div class="switch-thumb"></div>
+              </label>
+            </div>
+            <div class="timer-seconds" id="timerSecondsGroup">
+              <input type="number" id="timerSeconds" value="60" min="5" max="600" aria-label="Sekunder">
+              <span id="lblSek">sek</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </details>
 
   <input type="hidden" id="apiKey" autocomplete="off">
 
@@ -946,7 +1094,7 @@
   <div class="word-cards" id="wordCards"></div>
   <div class="game-actions">
     <button class="btn-primary" id="nextBtn" onclick="endRound()">Nästa spelare →</button>
-    <button class="btn-secondary" id="homeBtn" onclick="goHome()">Tillbaka till start</button>
+    <button class="btn-secondary btn-danger-subtle" id="homeBtn" onclick="goHome()">Avsluta spelet</button>
   </div>
 </div>
 
@@ -957,6 +1105,8 @@
     <h2 id="modalTitle">Runda klar!</h2>
     <div class="pts-big" id="modalPts">+0</div>
     <div class="pts-label" id="modalPtsLabel">poäng denna runda</div>
+    <div class="round-highlight" id="modalHighlight"></div>
+    <div class="next-player-note" id="modalNextPlayer"></div>
     <div class="standings" id="modalStandings"></div>
     <button class="btn-primary" id="modalNextBtn" onclick="closeRoundModal()">Nästa spelare →</button>
   </div>
@@ -1003,6 +1153,11 @@
     <div class="turn-label" id="waitTurnLabel"></div>
     <div class="player-name" id="waitPlayerName">—</div>
   </div>
+  <div class="card wait-card" id="waitStatusCard">
+    <div class="wait-kicker" id="waitKicker">Nästa steg</div>
+    <div class="wait-main" id="waitMain">Starta rundan när alla lyssnar</div>
+    <div class="wait-sub" id="waitSub">Runda 1 · 2 spelare</div>
+  </div>
   <div class="game-actions" id="waitActions"></div>
 </div>
 
@@ -1016,9 +1171,10 @@
   <div class="card" style="text-align:center;padding:40px 20px">
     <div style="font-family:var(--font-script);font-size:2rem;margin-bottom:10px;color:var(--blue)" id="specListenText">Lyssna och gissa!</div>
     <div style="color:var(--text-muted);font-size:0.875rem" id="specWaitText">Väntar på att rundan avslutas...</div>
+    <div class="wait-sub" id="specProgressText"></div>
   </div>
   <div class="game-actions">
-    <button class="btn-secondary" onclick="mpGoHome()" id="specHomeBtn">Avsluta spelet</button>
+    <button class="btn-secondary btn-danger-subtle" onclick="mpGoHome()" id="specHomeBtn">Avsluta spelet</button>
   </div>
 </div>
 
@@ -1919,6 +2075,7 @@ const UI = {
     logoSub: 'Det klassiska ordspelet – nu digitalt',
     lblSettings: 'Inställningar',
     lblLang: 'Språk', lblTheme: 'Tema', lblPlayers: 'Spelare', lblTimer: 'Timer', lblBarnMode: 'Barnläge',
+    setupOptions: 'Tema & inställningar',
     addBtn: '+ Lägg till gäst', lblSek: 'sek',
     advSummary: 'Avancerade inställningar (Claude API)',
     lblApiKey: 'Claude API-nyckel (valfritt)',
@@ -1926,8 +2083,8 @@ const UI = {
     startBtn: 'Starta spelet!',
     turnLabel: 'Det är din tur',
     nextBtn: 'avsluta runda →',
-    homeBtn: 'Tillbaka till start',
-    reveal: 'tryck för att visa',
+    homeBtn: 'Avsluta spelet',
+    reveal: 'tryck på kortet för att visa',
     diffs: { easy:'Lätt', medium:'Medel', hard:'Svår', barn:'Barnkort', person:'Person' },
     pts: { easy:'1 poäng', medium:'2 poäng', hard:'3 poäng', barn:'1 poäng' },
     timeUp: 'Tiden är ute!',
@@ -1938,6 +2095,16 @@ const UI = {
     roundTitle: 'Runda klar!',
     roundPtsLabel: 'poäng denna runda',
     modalNext: 'Nästa spelare →',
+    nextPlayerNote: (name) => `${name} är nästa`,
+    leaderNote: (name, pts) => `${name} leder med ${pts}p`,
+    tiedLeaderNote: (pts) => `Delad ledning på ${pts}p`,
+    noPointsNote: 'Ingen tog poäng den här rundan',
+    exitConfirm: 'Avsluta spelet och gå tillbaka till start?',
+    waitKicker: 'Nästa steg',
+    waitActive: 'Starta rundan när alla lyssnar',
+    waitPassive: (name) => `Väntar på att ${name} startar rundan`,
+    waitSub: (round, count) => `Runda ${round} · ${count} spelare`,
+    spectatorProgress: (round) => `Runda ${round} pågår`,
     statsTitle: 'Statistik',
     statsEmpty: 'Inga passade ord än – spela lite och kom tillbaka!',
     clearStats: 'Nollställ statistik',
@@ -1948,6 +2115,7 @@ const UI = {
     logoSub: 'The classic word game – now digital',
     lblSettings: 'Settings',
     lblLang: 'Language', lblTheme: 'Theme', lblPlayers: 'Players', lblTimer: 'Timer', lblBarnMode: 'Kids mode',
+    setupOptions: 'Theme & settings',
     addBtn: '+ Add guest', lblSek: 'sec',
     advSummary: 'Advanced settings (Claude API)',
     lblApiKey: 'Claude API key (optional)',
@@ -1955,8 +2123,8 @@ const UI = {
     startBtn: 'Start game!',
     turnLabel: "It's your turn",
     nextBtn: 'end round →',
-    homeBtn: 'Back to start',
-    reveal: 'tap to reveal',
+    homeBtn: 'End game',
+    reveal: 'tap the card to reveal',
     diffs: { easy:'Easy', medium:'Medium', hard:'Hard', barn:'Kids card', person:'Person' },
     pts: { easy:'1 point', medium:'2 points', hard:'3 points', barn:'1 point' },
     timeUp: 'Time is up!',
@@ -1967,6 +2135,16 @@ const UI = {
     roundTitle: 'Round over!',
     roundPtsLabel: 'points this round',
     modalNext: 'Next player →',
+    nextPlayerNote: (name) => `${name} is next`,
+    leaderNote: (name, pts) => `${name} leads with ${pts}p`,
+    tiedLeaderNote: (pts) => `Tied lead at ${pts}p`,
+    noPointsNote: 'No points this round',
+    exitConfirm: 'End the game and go back to start?',
+    waitKicker: 'Next step',
+    waitActive: 'Start the round when everyone is listening',
+    waitPassive: (name) => `Waiting for ${name} to start the round`,
+    waitSub: (round, count) => `Round ${round} · ${count} players`,
+    spectatorProgress: (round) => `Round ${round} in progress`,
     statsTitle: 'Statistics',
     statsEmpty: 'No passed words yet – play a bit and come back!',
     clearStats: 'Clear statistics',
@@ -2079,6 +2257,7 @@ function applyLangUI() {
   document.getElementById('lblLang').textContent    = t.lblLang;
   document.getElementById('lblTheme').textContent   = t.lblTheme;
   document.getElementById('lblPlayers').textContent = t.lblPlayers;
+  document.getElementById('setupOptionsSummary').textContent = t.setupOptions;
   document.getElementById('lblTimer').textContent      = t.lblTimer;
   document.getElementById('lblBarnMode').textContent   = t.lblBarnMode;
   document.getElementById('addPlayerBtn').textContent = t.addBtn;
@@ -2233,11 +2412,28 @@ function buildCard(idx, diff, word) {
     </div>
     <div class="scored-label"></div>`;
 
-  card.querySelector('.word-hint').addEventListener('click', () => {
+  card.classList.add('unrevealed');
+  card.tabIndex = 0;
+  card.setAttribute('role', 'button');
+  card.setAttribute('aria-label', t.reveal);
+  const reveal = () => {
     if (card.classList.contains('revealed')) return;
+    card.classList.remove('unrevealed');
     card.classList.add('revealed','pop');
+    card.removeAttribute('role');
+    card.removeAttribute('aria-label');
+    card.removeAttribute('tabindex');
     S.currentCards[idx].revealedAt = Date.now();
     setTimeout(() => card.classList.remove('pop'), 300);
+  };
+  card.addEventListener('click', (event) => {
+    if (event.target.closest('button')) return;
+    reveal();
+  });
+  card.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    reveal();
   });
 
   return card;
@@ -2308,12 +2504,19 @@ function endRound() {
 function showRoundModal() {
   const t = UI[S.lang];
   const player = S.players[S.idx];
+  const nextPlayer = S.players[(S.idx + 1) % S.players.length] || player;
   document.getElementById('modalTitle').textContent  = `${player} – ${t.roundTitle}`;
   document.getElementById('modalPts').textContent    = `+${S.roundPts}`;
   document.getElementById('modalPtsLabel').textContent = t.roundPtsLabel;
   document.getElementById('modalNextBtn').textContent  = t.modalNext;
+  document.getElementById('modalNextPlayer').textContent = t.nextPlayerNote(nextPlayer);
 
   const sorted = [...S.players].sort((a,b) => (S.scores[b]||0) - (S.scores[a]||0));
+  const topScore = S.scores[sorted[0]] || 0;
+  const leaders = sorted.filter(p => (S.scores[p] || 0) === topScore);
+  document.getElementById('modalHighlight').textContent = topScore <= 0
+    ? t.noPointsNote
+    : (leaders.length > 1 ? t.tiedLeaderNote(topScore) : t.leaderNote(leaders[0], topScore));
   const st = document.getElementById('modalStandings');
   st.innerHTML = '';
   sorted.forEach((p, i) => {
@@ -2600,6 +2803,8 @@ function clearStats() {
 //  MISC
 // ═══════════════════════════════════════════
 function goHome() {
+  const t = UI[S.lang] || UI.sv;
+  if (!window.confirm(t.exitConfirm)) return;
   clearInterval(S.timerTick);
   clearSession();
   MP.myName = null;
@@ -3002,23 +3207,24 @@ function mpScoreBand(id, sv) {
 function mpShowWaiting(sv, isActive) {
   mpScoreBand('waitScoreBand', sv);
   const l = sv.lang || 'sv';
+  const t = UI[l] || UI.sv;
   const cur = sv.players[sv.idx];
   document.getElementById('waitTurnLabel').textContent = isActive
     ? (l === 'sv' ? 'Det är din tur' : "It's your turn")
     : (l === 'sv' ? 'Det är dags för' : "It's time for");
   document.getElementById('waitPlayerName').textContent = cur;
+  document.getElementById('waitKicker').textContent = t.waitKicker;
+  document.getElementById('waitMain').textContent = isActive ? t.waitActive : t.waitPassive(cur);
+  document.getElementById('waitSub').textContent = t.waitSub(sv.round || 1, sv.players.length);
   const acts = document.getElementById('waitActions');
   const homeLbl = l === 'sv' ? 'Avsluta spelet' : 'End game';
   if (isActive) {
     acts.innerHTML = `
       <button class="btn-primary" onclick="mpBeginRound()">${l === 'sv' ? 'börja rundan!' : 'start round!'}</button>
-      <button class="btn-secondary" onclick="mpGoHome()">${homeLbl}</button>`;
+      <button class="btn-secondary btn-danger-subtle" onclick="mpGoHome()">${homeLbl}</button>`;
   } else {
     acts.innerHTML = `
-      <div style="text-align:center;color:var(--text-muted);font-size:.9rem;padding:12px 0">
-        ${l === 'sv' ? 'Väntar på att rundan börjar...' : 'Waiting for round to start...'}
-      </div>
-      <button class="btn-secondary" onclick="mpGoHome()">${homeLbl}</button>`;
+      <button class="btn-secondary btn-danger-subtle" onclick="mpGoHome()">${homeLbl}</button>`;
   }
   showScreen('waitingScreen');
 }
@@ -3050,10 +3256,12 @@ function showScoreNotif(event, lang) {
 function mpShowSpectator(sv) {
   mpScoreBand('specScoreBand', sv);
   const l = sv.lang || 'sv';
+  const t = UI[l] || UI.sv;
   document.getElementById('specPlayerName').textContent = sv.players[sv.idx];
   document.getElementById('specLabel').textContent      = l === 'sv' ? 'Förklarar just nu' : 'Explaining right now';
   document.getElementById('specListenText').textContent = l === 'sv' ? 'Lyssna och gissa!' : 'Listen and guess!';
   document.getElementById('specWaitText').textContent   = l === 'sv' ? 'Väntar på att rundan avslutas...' : 'Waiting for round to end...';
+  document.getElementById('specProgressText').textContent = t.spectatorProgress(sv.round || 1);
   document.getElementById('specHomeBtn').textContent    = (l === 'sv' ? 'Avsluta spelet' : 'End game');
   showScreen('spectatorScreen');
 }
@@ -3061,13 +3269,21 @@ function mpShowSpectator(sv) {
 function mpShowSummary(sv) {
   const t = UI[sv.lang || 'sv'];
   const player = sv.players[sv.idx];
+  const nextPlayer = sv.players[(sv.idx + 1) % sv.players.length] || player;
   document.getElementById('modalTitle').textContent    = `${player} – ${t.roundTitle}`;
   document.getElementById('modalPts').textContent      = `+${sv.round_pts}`;
   document.getElementById('modalPtsLabel').textContent = t.roundPtsLabel;
   document.getElementById('modalNextBtn').textContent  = t.modalNext;
+  document.getElementById('modalNextPlayer').textContent = t.nextPlayerNote(nextPlayer);
+  const sorted = [...sv.players].sort((a, b) => (sv.scores[b] || 0) - (sv.scores[a] || 0));
+  const topScore = sv.scores[sorted[0]] || 0;
+  const leaders = sorted.filter(p => (sv.scores[p] || 0) === topScore);
+  document.getElementById('modalHighlight').textContent = topScore <= 0
+    ? t.noPointsNote
+    : (leaders.length > 1 ? t.tiedLeaderNote(topScore) : t.leaderNote(leaders[0], topScore));
   const st = document.getElementById('modalStandings');
   st.innerHTML = '';
-  [...sv.players].sort((a, b) => (sv.scores[b] || 0) - (sv.scores[a] || 0)).forEach((p, i) => {
+  sorted.forEach((p, i) => {
     const row = document.createElement('div');
     row.className = 'standing-row' + (i === 0 ? ' leader' : '');
     row.innerHTML = `<span class="standing-pos">${i+1}.</span>
