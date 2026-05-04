@@ -89,8 +89,9 @@ export function calcMarkCard(card, status) {
   return { pts: status === 'right' ? (PTS[card.diff] || 1) : 0 };
 }
 
-/** Apply the pass penalty: subtract 1 point, floor at 0. */
-export function calcPassPenalty(roundPts) {
+/** Apply the pass penalty: subtract 1 point, floor at 0. Barnläge has no penalty. */
+export function calcPassPenalty(roundPts, diff = null) {
+  if (diff === 'barn') return roundPts;
   return Math.max(0, roundPts - 1);
 }
 

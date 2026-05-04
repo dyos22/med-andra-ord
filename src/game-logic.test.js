@@ -245,6 +245,11 @@ describe('calcPassPenalty', () => {
   it('never returns a negative value', () => {
     expect(calcPassPenalty(0)).toBe(0);
   });
+
+  it('does not subtract points in barnläge', () => {
+    expect(calcPassPenalty(5, 'barn')).toBe(5);
+    expect(calcPassPenalty(0, 'barn')).toBe(0);
+  });
 });
 
 // ─── Stats ────────────────────────────────────────────────────────────────────

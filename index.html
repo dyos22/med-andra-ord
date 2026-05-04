@@ -1923,21 +1923,63 @@ function emptyPlayerStats() {
     rounds: 0, points: 0, right: 0, passes: 0,
     totalExplainMs: 0, fastestMs: null, fastestWord: '', fastestAt: null,
     totalRoundMs: 0, fastestRoundMs: null, fastestRoundAt: null, fastestRoundPoints: 0,
-    byTheme: {}, byDiff: {}, passWords: {},
+    byTheme: {}, byDiff: {}, passWords: {}, updatedAt: 0,
   };
+}
+
+function normalizeRichStats(stats) {
+  const normalized = { players: {}, guests: [], ...(stats || {}) };
+  Object.entries(normalized.players || {}).forEach(([name, ps]) => {
+    normalized.players[name] = { ...emptyPlayerStats(), ...(ps || {}) };
+  });
+  normalized.guests = Array.isArray(normalized.guests) ? normalized.guests : [];
+  return normalized;
 }
 
 function getRichStats() {
   try {
-    const stats = JSON.parse(localStorage.getItem(RICH_STATS_KEY) || '{}');
-    return { players: {}, guests: [], ...stats };
+    return normalizeRichStats(JSON.parse(localStorage.getItem(RICH_STATS_KEY) || '{}'));
   } catch {
     return { players: {}, guests: [] };
   }
 }
 
 function saveRichStats(stats) {
-  try { localStorage.setItem(RICH_STATS_KEY, JSON.stringify(stats)); } catch {}
+  try { localStorage.setItem(RICH_STATS_KEY, JSON.stringify(normalizeRichStats(stats))); } catch {}
+}
+
+function mergeRichStats(...sources) {
+  const merged = { players: {}, guests: [] };
+  sources.map(normalizeRichStats).forEach(source => {
+    Object.entries(source.players || {}).forEach(([name, ps]) => {
+      const current = merged.players[name];
+      if (!current || (ps.updatedAt || 0) >= (current.updatedAt || 0)) {
+        merged.players[name] = { ...emptyPlayerStats(), ...ps };
+      }
+    });
+    (source.guests || []).forEach(guest => {
+      if (!guest?.name) return;
+      const prev = merged.guests.find(g => g.name === guest.name);
+      if (!prev) merged.guests.push({ name: guest.name, lastSeen: guest.lastSeen || 0 });
+      else prev.lastSeen = Math.max(prev.lastSeen || 0, guest.lastSeen || 0);
+    });
+  });
+  merged.guests.sort((a, b) => (b.lastSeen || 0) - (a.lastSeen || 0));
+  merged.guests = merged.guests.slice(0, 12);
+  return merged;
+}
+
+function getCombinedRichStats() {
+  return mergeRichStats(getRichStats(), MP.lastState?.rich_stats);
+}
+
+function saveAndSyncRichStats(stats) {
+  saveRichStats(stats);
+  try {
+    if (MP.supabase && MP.myName && isActiveRoom(MP.lastState)) {
+      mpPost('merge_stats', { rich_stats: stats }).catch(() => {});
+    }
+  } catch {}
 }
 
 function ensurePlayerStats(stats, player) {
@@ -1955,6 +1997,7 @@ function noteGuestPlayer(stats, player) {
 function logRoundStats(player, points, durationMs) {
   const stats = getRichStats();
   const ps = ensurePlayerStats(stats, player);
+  ps.updatedAt = Date.now();
   ps.rounds++;
   ps.points += points;
   if (durationMs) {
@@ -1966,13 +2009,14 @@ function logRoundStats(player, points, durationMs) {
     }
   }
   noteGuestPlayer(stats, player);
-  saveRichStats(stats);
+  saveAndSyncRichStats(stats);
 }
 
 function logWordStat({ player, word, status, diff, theme, explainMs }) {
   if (!player || !word || word === EXHAUSTED) return;
   const stats = getRichStats();
   const ps = ensurePlayerStats(stats, player);
+  ps.updatedAt = Date.now();
   const bucket = ps.byTheme[theme] || (ps.byTheme[theme] = { right: 0, passes: 0, totalExplainMs: 0 });
   const diffBucket = ps.byDiff[diff] || (ps.byDiff[diff] = { right: 0, passes: 0, totalExplainMs: 0 });
 
@@ -1998,17 +2042,17 @@ function logWordStat({ player, word, status, diff, theme, explainMs }) {
   }
 
   noteGuestPlayer(stats, player);
-  saveRichStats(stats);
+  saveAndSyncRichStats(stats);
 }
 
 function pruneGuestStats() {
-  const stats = getRichStats();
+  const stats = getCombinedRichStats();
   const keepGuests = (stats.guests || []).slice(0, 4).map(g => g.name);
   Object.keys(stats.players || {}).forEach(name => {
     if (!FAMILY_PLAYERS.includes(name) && !keepGuests.includes(name)) delete stats.players[name];
   });
   stats.guests = (stats.guests || []).slice(0, 4);
-  saveRichStats(stats);
+  saveAndSyncRichStats(stats);
   showStats();
   toast('Äldre gäster rensade');
 }
@@ -2344,11 +2388,17 @@ function startGame() {
     timer_dur: S.timerDur,
     barn_mode: S.barnMode,
     used_words: getStoredUsedWordsByLang(),
+    rich_stats: getRichStats(),
   })
     .then(res => {
       if (res) {
         // Server responded — sync multiplayer state
-        return mpPost('join', { player: myJoinName, session_id: MP.sessionId, used_words: getStoredUsedWordsByLang() })
+        return mpPost('join', {
+          player: myJoinName,
+          session_id: MP.sessionId,
+          used_words: getStoredUsedWordsByLang(),
+          rich_stats: getRichStats(),
+        })
           .then(() => { MP.lastVer = -1; mpSync(); });
       } else {
         // No server — start local game directly
@@ -2512,7 +2562,7 @@ function passCard(idx) {
     return;
   }
   c.word = newWord; c.status = null; c.theme = S.theme; c.revealedAt = null;
-  if (newWord !== EXHAUSTED) S.roundPts = Math.max(0, S.roundPts - 1);
+  if (newWord !== EXHAUSTED && c.diff !== 'barn') S.roundPts = Math.max(0, S.roundPts - 1);
   const old = document.getElementById(`card_${idx}`);
   const newCard = buildCard(idx, c.diff, newWord);
   if (newWord !== EXHAUSTED) {
@@ -2789,7 +2839,7 @@ function passWordPills(ps) {
 
 function showStats() {
   const t = UI[S.lang];
-  const rich = getRichStats();
+  const rich = getCombinedRichStats();
   const rounds = getTotalRounds(S.lang);
   document.getElementById('statsTitle').textContent = t.statsTitle;
   document.getElementById('statsMeta').textContent  = `${rounds} rundor historiskt · ny dashboard fylls på från och med nu`;
@@ -2833,6 +2883,10 @@ function clearStats() {
   localStorage.removeItem(`mao_stats_${S.lang}`);
   localStorage.removeItem(`mao_rounds_${S.lang}`);
   localStorage.removeItem(RICH_STATS_KEY);
+  try {
+    if (MP.lastState) MP.lastState.rich_stats = { players: {}, guests: [] };
+    if (MP.supabase && MP.myName && isActiveRoom(MP.lastState)) mpPost('clear_stats');
+  } catch {}
   statsSelectedPlayer = 'Alla';
   showStats();
   toast(t.clearStats);
@@ -2923,6 +2977,7 @@ function mpNewState({
   timer_dur = 60,
   barn_mode = S.barnMode,
   used_words = null,
+  rich_stats = null,
 } = {}) {
   return {
     version: 1,
@@ -2941,6 +2996,7 @@ function mpNewState({
     timer_started_at: null,
     round_pts: 0,
     used_words: mergeUsedWords(getStoredUsedWordsByLang(), used_words),
+    rich_stats: mergeRichStats(getRichStats(), rich_stats),
     last_event: null,
   };
 }
@@ -3022,6 +3078,7 @@ async function mpCloudPost(action, extra = {}) {
     sv.claimed_sessions = claimed;
     sv.claimed_names = Object.keys(claimed);
     sv.used_words = mergeUsedWords(sv.used_words, extra.used_words);
+    sv.rich_stats = mergeRichStats(sv.rich_stats, extra.rich_stats);
   } else if (action === 'start_round') {
     sv.phase = 'playing';
     sv.round_pts = 0;
@@ -3040,6 +3097,10 @@ async function mpCloudPost(action, extra = {}) {
       if (!usedWords[lang].includes(word)) usedWords[lang].push(word);
       sv.used_words = mergeUsedWords(usedWords);
     }
+  } else if (action === 'merge_stats') {
+    sv.rich_stats = mergeRichStats(sv.rich_stats, extra.rich_stats);
+  } else if (action === 'clear_stats') {
+    sv.rich_stats = { players: {}, guests: [] };
   } else if (action === 'end_round') {
     const player = sv.players[sv.idx];
     const pts = extra.round_pts || 0;
@@ -3106,6 +3167,7 @@ async function mpSync() {
 
 function mpHandle(sv) {
   MP.lastState = sv;
+  if (sv.rich_stats) saveRichStats(mergeRichStats(getRichStats(), sv.rich_stats));
   const modal = document.getElementById('roundModal');
   if (!isActiveRoom(sv)) {
     MP.autoJoinTried = false;
@@ -3196,6 +3258,7 @@ function tryAutoJoin(sv) {
     player: MP.deviceOwner,
     session_id: MP.sessionId,
     used_words: getStoredUsedWordsByLang(),
+    rich_stats: getRichStats(),
   }).then(res => {
     if (res && res.ok) {
       MP.myName = MP.deviceOwner;
@@ -3233,6 +3296,7 @@ function mpShowLogin(sv) {
           player: name,
           session_id: MP.sessionId,
           used_words: getStoredUsedWordsByLang(),
+          rich_stats: getRichStats(),
         });
         if (res && res.ok) {
           MP.myName = name;
