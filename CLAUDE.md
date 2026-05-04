@@ -15,7 +15,6 @@ Multiplayer via Supabase Realtime. Deployad på GitHub Pages — push till `main
 ## Tester
 Verifiera ändringar innan push med den lättaste relevanta kontrollen för ändringen.
 För `index.html`: kör åtminstone syntaxkontroll av inline-JS och gärna en snabb browserkontroll av berört flöde.
-Kör inte `npm test` automatiskt i Codex-miljön om `npm` saknas.
 
 ## Git
 - Committa och pusha när en uppgift är klar, utan att fråga
