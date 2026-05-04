@@ -8,7 +8,8 @@ spelare och poängsynk.
 ## Ordlistor
 
 `words.generated.js` byggs med `scripts/generate-wordlists.mjs` från SALDO,
-Flex och SCOWL. Läs mer i `WORDLISTS.md`.
+Flex, SCOWL och de kuraterade filerna i `data/curated/`. Läs mer i
+`WORDLISTS.md`.
 
 ## Filer
 

@@ -30,6 +30,13 @@ Barnläget är en separat, konservativ lista. Den byggs av befintliga barnord,
 tematiska barnord och en kuraterad barnsäker seedlista, men orden valideras mot
 SALDO/SCOWL när det är enskilda ord.
 
+## Personer och meningar
+
+`personer` och `meningar` är kuraterade i `data/curated/sv.json` och
+`data/curated/en.json`. De genereras inte från SALDO/SCOWL, eftersom namn,
+fiktiva figurer, idiom och fraser fungerar bättre som redaktionellt innehåll.
+Generatorn validerar att listorna finns, inte är tomma och saknar dubletter.
+
 ## Fallback
 
 Temalistorna är hårdare filtrerade än standardlistan. Om ett tema tar slut för

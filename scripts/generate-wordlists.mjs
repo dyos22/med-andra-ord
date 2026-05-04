@@ -7,6 +7,7 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const CACHE = path.join(ROOT, '.cache', 'wordlists');
 const INDEX = path.join(ROOT, 'index.html');
 const OUT = path.join(ROOT, 'words.generated.js');
+const CURATED_DIR = path.join(ROOT, 'data', 'curated');
 
 const SOURCES = {
   saldoXml: 'https://svn.spraakbanken.gu.se/sb-arkiv/pub/lmf/saldo/saldo.xml',
@@ -83,6 +84,16 @@ function extractCurrentWords() {
   const end = html.indexOf('// ═══════════════════════════════════════════\n//  THEMES CONFIG', start);
   if (start < 0 || end < 0) throw new Error('Kunde inte hitta befintlig WORDS-block i index.html');
   return new Function(`${html.slice(start, end)}\nreturn { PERSONS_DATA, WORDS };`)();
+}
+
+function readCurated() {
+  const curated = {};
+  for (const lang of ['sv', 'en']) {
+    const file = path.join(CURATED_DIR, `${lang}.json`);
+    if (!fs.existsSync(file)) throw new Error(`Saknar kuraterad fil: ${file}`);
+    curated[lang] = JSON.parse(fs.readFileSync(file, 'utf8'));
+  }
+  return curated;
 }
 
 function normWord(word, lang) {
@@ -251,7 +262,24 @@ function filterSeedList(words, lang, validator, allowPhrase = false) {
   return uniq(words || [], lang).filter(word => validator(word, allowPhrase));
 }
 
-function buildGenerated(current, saldo, flexRows, scowlRows) {
+function validateCurated(curated) {
+  for (const lang of ['sv', 'en']) {
+    for (const theme of ['personer', 'meningar']) {
+      for (const diff of DIFFS) {
+        const list = curated[lang]?.[theme]?.[diff];
+        if (!Array.isArray(list) || !list.length) {
+          throw new Error(`Kuraterad lista saknas eller är tom: ${lang}.${theme}.${diff}`);
+        }
+        const normalized = uniq(list, lang);
+        if (normalized.length !== list.length) {
+          throw new Error(`Kuraterad lista har dubletter/tomma poster: ${lang}.${theme}.${diff}`);
+        }
+      }
+    }
+  }
+}
+
+function buildGenerated(current, curated, saldo, flexRows, scowlRows) {
   const scowlSet = new Set(scowlRows.map(row => row.word));
   const out = { sv: {}, en: {} };
 
@@ -262,6 +290,15 @@ function buildGenerated(current, saldo, flexRows, scowlRows) {
       const allowPhrase = theme === 'meningar' || theme === 'personer';
       out.sv[theme][diff] = filterSeedList(current.WORDS.sv[theme]?.[diff] || [], 'sv', (w, p) => validSv(w, saldo, p) || allowPhrase, allowPhrase);
       out.en[theme][diff] = filterSeedList(current.WORDS.en[theme]?.[diff] || [], 'en', (w, p) => validEn(w, scowlSet, p) || allowPhrase, allowPhrase);
+    }
+  }
+
+  validateCurated(curated);
+  for (const lang of ['sv', 'en']) {
+    for (const theme of ['personer', 'meningar']) {
+      for (const diff of DIFFS) {
+        out[lang][theme][diff] = curated[lang][theme][diff];
+      }
     }
   }
 
@@ -324,10 +361,11 @@ function writeOutput(words) {
 
 ensureDir(CACHE);
 const current = extractCurrentWords();
+const curated = readCurated();
 const saldo = readSaldo();
 const flexRows = readFlex(saldo);
 const scowlRows = readScowl();
 console.log(`SALDO-kandidater: ${saldo.size}`);
 console.log(`Flex-kandidater: ${flexRows.length}`);
 console.log(`SCOWL-kandidater: ${scowlRows.length}`);
-writeOutput(buildGenerated(current, saldo, flexRows, scowlRows));
+writeOutput(buildGenerated(current, curated, saldo, flexRows, scowlRows));
