@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   EXHAUSTED,
   PTS,
+  normalizeWordList,
+  mergeUsedWords,
   getGlobalUsed,
   markWordUsed,
   pickWord,
@@ -43,6 +45,30 @@ describe('getGlobalUsed', () => {
   it('returns an empty Set on corrupt JSON', () => {
     localStorage.setItem('mao_used_sv', '{not valid json}');
     expect(getGlobalUsed('sv').size).toBe(0);
+  });
+});
+
+describe('normalizeWordList', () => {
+  it('normalizes, trims and deduplicates words', () => {
+    expect(normalizeWordList([' Hund ', 'hund', 'KATT', '', null]))
+      .toEqual(['hund', 'katt']);
+  });
+
+  it('returns [] for non-arrays', () => {
+    expect(normalizeWordList(null)).toEqual([]);
+  });
+});
+
+describe('mergeUsedWords', () => {
+  it('merges both languages case-insensitively', () => {
+    expect(mergeUsedWords(
+      { sv: ['Hund'], en: ['Cat'] },
+      { sv: ['hund', 'Katt'], en: ['cat', 'Dog'] },
+    )).toEqual({ sv: ['hund', 'katt'], en: ['cat', 'dog'] });
+  });
+
+  it('keeps missing languages as empty arrays', () => {
+    expect(mergeUsedWords({ sv: ['hund'] })).toEqual({ sv: ['hund'], en: [] });
   });
 });
 

@@ -9,10 +9,32 @@ export const PTS = { easy: 1, medium: 2, hard: 3, barn: 1 };
 
 // ─── Word tracking ───────────────────────────────────────────────────────────
 
+export function normalizeWordList(words) {
+  const seen = new Set();
+  (Array.isArray(words) ? words : []).forEach(word => {
+    const key = String(word || '').trim().toLowerCase();
+    if (key) seen.add(key);
+  });
+  return [...seen];
+}
+
+export function mergeUsedWords(...sources) {
+  const merged = { sv: [], en: [] };
+  sources.forEach(source => {
+    ['sv', 'en'].forEach(lang => {
+      merged[lang] = normalizeWordList([
+        ...merged[lang],
+        ...(Array.isArray(source?.[lang]) ? source[lang] : []),
+      ]);
+    });
+  });
+  return merged;
+}
+
 export function getGlobalUsed(lang) {
   try {
     const raw = localStorage.getItem(`mao_used_${lang}`);
-    return new Set(raw ? JSON.parse(raw) : []);
+    return new Set(normalizeWordList(raw ? JSON.parse(raw) : []));
   } catch { return new Set(); }
 }
 

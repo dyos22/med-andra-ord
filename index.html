@@ -1813,12 +1813,41 @@ const S = {
 // ═══════════════════════════════════════════
 const EXHAUSTED = '__EXHAUSTED__';
 
+function normalizeWordList(words) {
+  const seen = new Set();
+  (Array.isArray(words) ? words : []).forEach(word => {
+    const key = String(word || '').trim().toLowerCase();
+    if (key) seen.add(key);
+  });
+  return [...seen];
+}
+
+function mergeUsedWords(...sources) {
+  const merged = { sv: [], en: [] };
+  sources.forEach(source => {
+    ['sv', 'en'].forEach(lang => {
+      merged[lang] = normalizeWordList([
+        ...merged[lang],
+        ...(Array.isArray(source?.[lang]) ? source[lang] : []),
+      ]);
+    });
+  });
+  return merged;
+}
+
+function getStoredUsedWords(lang) {
+  try {
+    return normalizeWordList(JSON.parse(localStorage.getItem(`mao_used_${lang}`) || '[]'));
+  } catch { return []; }
+}
+
+function getStoredUsedWordsByLang() {
+  return { sv: getStoredUsedWords('sv'), en: getStoredUsedWords('en') };
+}
+
 function getGlobalUsed(lang) {
   const used = new Set();
-  try {
-    const raw = localStorage.getItem(`mao_used_${lang}`);
-    (raw ? JSON.parse(raw) : []).forEach(word => used.add(String(word).toLowerCase()));
-  } catch {}
+  getStoredUsedWords(lang).forEach(word => used.add(word));
   try {
     ((MP.lastState?.used_words?.[lang]) || []).forEach(word => used.add(String(word).toLowerCase()));
   } catch {}
@@ -1826,7 +1855,8 @@ function getGlobalUsed(lang) {
 }
 function markWordUsed(lang, word) {
   if (word === EXHAUSTED) return;
-  const key = word.toLowerCase();
+  const key = String(word || '').trim().toLowerCase();
+  if (!key) return;
   try {
     const used = getGlobalUsed(lang);
     used.add(key);
@@ -2305,11 +2335,19 @@ function startGame() {
   MP.autoJoinTried = false;
 
   // Try multiplayer server; fall back to local game if no server available
-  mpPost('setup', { players, lang: S.lang, theme: S.theme, timer_on: S.timerOn, timer_dur: S.timerDur })
+  mpPost('setup', {
+    players,
+    lang: S.lang,
+    theme: S.theme,
+    timer_on: S.timerOn,
+    timer_dur: S.timerDur,
+    barn_mode: S.barnMode,
+    used_words: getStoredUsedWordsByLang(),
+  })
     .then(res => {
       if (res) {
         // Server responded — sync multiplayer state
-        return mpPost('join', { player: myJoinName, session_id: MP.sessionId })
+        return mpPost('join', { player: myJoinName, session_id: MP.sessionId, used_words: getStoredUsedWordsByLang() })
           .then(() => { MP.lastVer = -1; mpSync(); });
       } else {
         // No server — start local game directly
@@ -2877,7 +2915,15 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
 }
 
-function mpNewState({ players = [], lang = S.lang, theme = S.theme, timer_on = false, timer_dur = 60 } = {}) {
+function mpNewState({
+  players = [],
+  lang = S.lang,
+  theme = S.theme,
+  timer_on = false,
+  timer_dur = 60,
+  barn_mode = S.barnMode,
+  used_words = null,
+} = {}) {
   return {
     version: 1,
     phase: players.length ? 'waiting_for_round' : 'setup',
@@ -2891,9 +2937,10 @@ function mpNewState({ players = [], lang = S.lang, theme = S.theme, timer_on = f
     theme,
     timer_on,
     timer_dur,
+    barn_mode: Boolean(barn_mode),
     timer_started_at: null,
     round_pts: 0,
-    used_words: { sv: [], en: [] },
+    used_words: mergeUsedWords(getStoredUsedWordsByLang(), used_words),
     last_event: null,
   };
 }
@@ -2967,6 +3014,7 @@ async function mpCloudPost(action, extra = {}) {
     claimed[player] = extra.session_id;
     sv.claimed_sessions = claimed;
     sv.claimed_names = Object.keys(claimed);
+    sv.used_words = mergeUsedWords(sv.used_words, extra.used_words);
   } else if (action === 'start_round') {
     sv.phase = 'playing';
     sv.round_pts = 0;
@@ -2983,7 +3031,7 @@ async function mpCloudPost(action, extra = {}) {
         en: Array.isArray(sv.used_words?.en) ? sv.used_words.en.slice() : [],
       };
       if (!usedWords[lang].includes(word)) usedWords[lang].push(word);
-      sv.used_words = usedWords;
+      sv.used_words = mergeUsedWords(usedWords);
     }
   } else if (action === 'end_round') {
     const player = sv.players[sv.idx];
@@ -3071,7 +3119,8 @@ function mpHandle(sv) {
       Object.assign(S, {
         players: sv.players.slice(), scores: { ...sv.scores },
         idx: sv.idx, lang: sv.lang, theme: sv.theme,
-        timerOn: sv.timer_on, timerDur: sv.timer_dur, roundPts: 0,
+        timerOn: sv.timer_on, timerDur: sv.timer_dur,
+        barnMode: Boolean(sv.barn_mode), roundPts: 0,
       });
       if (sv.timer_on && sv.timer_remaining != null)
         S._timerStart = Math.round(sv.timer_remaining);
@@ -3130,7 +3179,11 @@ function tryAutoJoin(sv) {
   if (!sv.players.includes(MP.deviceOwner)) return false;
   MP.autoJoinTried = true;
   document.getElementById('connectingMsg').style.display = '';
-  mpPost('join', { player: MP.deviceOwner, session_id: MP.sessionId }).then(res => {
+  mpPost('join', {
+    player: MP.deviceOwner,
+    session_id: MP.sessionId,
+    used_words: getStoredUsedWordsByLang(),
+  }).then(res => {
     if (res && res.ok) {
       MP.myName = MP.deviceOwner;
       sessionStorage.setItem('mao_mp_player', MP.deviceOwner);
@@ -3163,7 +3216,11 @@ function mpShowLogin(sv) {
         b.title = 'Redan ansluten';
       }
       b.onclick = async () => {
-        const res = await mpPost('join', { player: name, session_id: MP.sessionId });
+        const res = await mpPost('join', {
+          player: name,
+          session_id: MP.sessionId,
+          used_words: getStoredUsedWordsByLang(),
+        });
         if (res && res.ok) {
           MP.myName = name;
           sessionStorage.setItem('mao_mp_player', name);
