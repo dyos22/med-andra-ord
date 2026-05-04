@@ -999,7 +999,7 @@
 <body>
 
 <!-- ======== START SCREEN ======== -->
-<div id="startScreen" class="screen">
+<div id="startScreen" class="screen active">
   <div class="logo">
     <h1>Med <em>Andra</em> Ord</h1>
     <p id="logoSub">Det klassiska ordspelet – nu digitalt</p>
@@ -1132,7 +1132,7 @@
 
 
 <!-- ======== LOGIN SCREEN ======== -->
-<div id="loginScreen" class="screen active">
+<div id="loginScreen" class="screen">
   <div class="logo">
     <h1>Med <em>Andra</em> Ord</h1>
     <p>Det klassiska ordspelet – nu digitalt</p>
@@ -2188,6 +2188,7 @@ const UI = {
 // ═══════════════════════════════════════════
 const FAMILY_ROOM = 'FAMILY';
 const PRESET_PLAYERS = ['John', 'Yasmin', 'Alva'];
+const ACTIVE_ROOM_MAX_AGE_MS = 6 * 60 * 60 * 1000;
 
 let playerSeq = 0;
 const presetActive = Object.fromEntries(PRESET_PLAYERS.map(n => [n, false]));
@@ -2849,7 +2850,6 @@ function goHome() {
   MP.roundActive = false;
   MP.autoJoinTried = true;
   sessionStorage.removeItem('mao_mp_player');
-  setDeviceOwner(null);
   mpPost('go_home').then(() => {
     MP.lastVer = -1;
     mpSync();
@@ -2949,6 +2949,13 @@ function mpWithTimer(sv) {
   if (!sv || !sv.timer_on || sv.phase !== 'playing' || !sv.timer_started_at) return sv;
   const elapsed = Math.max(0, Math.floor((Date.now() - Date.parse(sv.timer_started_at)) / 1000));
   return { ...sv, timer_remaining: Math.max(0, (sv.timer_dur || 60) - elapsed) };
+}
+
+function isActiveRoom(sv) {
+  if (!sv || sv.phase === 'setup' || !Array.isArray(sv.players) || !sv.players.length) return false;
+  const updatedAt = Date.parse(sv.updated_at || '');
+  if (!Number.isFinite(updatedAt)) return false;
+  return Date.now() - updatedAt <= ACTIVE_ROOM_MAX_AGE_MS;
 }
 
 async function mpLoadRoom() {
@@ -3100,8 +3107,14 @@ async function mpSync() {
 function mpHandle(sv) {
   MP.lastState = sv;
   const modal = document.getElementById('roundModal');
-  if (sv.phase === 'setup') MP.autoJoinTried = false;
-  if (sv.phase === 'setup' || !MP.myName || !sv.players.includes(MP.myName)) {
+  if (!isActiveRoom(sv)) {
+    MP.autoJoinTried = false;
+    MP.roundActive = false;
+    modal.classList.remove('open');
+    if (!document.getElementById('startScreen').classList.contains('active')) showScreen('startScreen');
+    return;
+  }
+  if (!MP.myName || !sv.players.includes(MP.myName)) {
     modal.classList.remove('open');
     MP.roundActive = false;
     mpShowLogin(sv);
