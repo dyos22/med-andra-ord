@@ -1,23 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   EXHAUSTED,
-  PTS,
   normalizeWordList,
   mergeUsedWords,
   getGlobalUsed,
   markWordUsed,
   pickWord,
-  calcMarkCard,
-  calcPassPenalty,
   getStats,
   saveStats,
   logPassStat,
   getTotalRounds,
   incRounds,
-  buildSessionLeaderText,
-  calcTimerState,
-  parseFetchMoreResponse,
-  deduplicateWords,
 } from './game-logic.js';
 
 // jsdom provides localStorage; wipe it before every test for isolation.
@@ -196,73 +189,6 @@ describe('pickWord', () => {
   });
 });
 
-// ─── calcMarkCard ─────────────────────────────────────────────────────────────
-
-describe('calcMarkCard', () => {
-  it('awards 1 pt for easy', () => {
-    expect(calcMarkCard({ diff: 'easy', status: null }, 'right').pts).toBe(1);
-  });
-
-  it('awards 2 pts for medium', () => {
-    expect(calcMarkCard({ diff: 'medium', status: null }, 'right').pts).toBe(2);
-  });
-
-  it('awards 3 pts for hard', () => {
-    expect(calcMarkCard({ diff: 'hard', status: null }, 'right').pts).toBe(3);
-  });
-
-  it('awards 1 pt for barn', () => {
-    expect(calcMarkCard({ diff: 'barn', status: null }, 'right').pts).toBe(1);
-  });
-
-  it('awards 0 pts on pass', () => {
-    expect(calcMarkCard({ diff: 'hard', status: null }, 'pass').pts).toBe(0);
-  });
-
-  it('returns null for an already-scored card', () => {
-    expect(calcMarkCard({ diff: 'easy', status: 'right' }, 'right')).toBeNull();
-    expect(calcMarkCard({ diff: 'easy', status: 'pass' }, 'right')).toBeNull();
-  });
-
-  it('returns null for a missing card', () => {
-    expect(calcMarkCard(null, 'right')).toBeNull();
-    expect(calcMarkCard(undefined, 'right')).toBeNull();
-  });
-
-  it('defaults to 1 pt for an unknown diff', () => {
-    expect(calcMarkCard({ diff: 'unknown', status: null }, 'right').pts).toBe(1);
-  });
-});
-
-// ─── PTS constant ─────────────────────────────────────────────────────────────
-
-describe('PTS constant', () => {
-  it('has the correct values for all difficulties', () => {
-    expect(PTS.easy).toBe(1);
-    expect(PTS.medium).toBe(2);
-    expect(PTS.hard).toBe(3);
-    expect(PTS.barn).toBe(1);
-  });
-});
-
-// ─── calcPassPenalty ──────────────────────────────────────────────────────────
-
-describe('calcPassPenalty', () => {
-  it('subtracts 1 from the current round points', () => {
-    expect(calcPassPenalty(5)).toBe(4);
-    expect(calcPassPenalty(1)).toBe(0);
-  });
-
-  it('never returns a negative value', () => {
-    expect(calcPassPenalty(0)).toBe(0);
-  });
-
-  it('does not subtract points in barnläge', () => {
-    expect(calcPassPenalty(5, 'barn')).toBe(5);
-    expect(calcPassPenalty(0, 'barn')).toBe(0);
-  });
-});
-
 // ─── Stats ────────────────────────────────────────────────────────────────────
 
 describe('getStats / saveStats', () => {
@@ -315,149 +241,5 @@ describe('getTotalRounds / incRounds', () => {
   it('is scoped per language', () => {
     incRounds('sv');
     expect(getTotalRounds('en')).toBe(0);
-  });
-});
-
-// ─── buildSessionLeaderText ───────────────────────────────────────────────────
-
-describe('buildSessionLeaderText', () => {
-  it('returns an empty string for empty scores', () => {
-    expect(buildSessionLeaderText({})).toBe('');
-  });
-
-  it('returns an empty string for null/undefined', () => {
-    expect(buildSessionLeaderText(null)).toBe('');
-    expect(buildSessionLeaderText(undefined)).toBe('');
-  });
-
-  it('names the player with the highest score', () => {
-    expect(buildSessionLeaderText({ Alice: 10, Bob: 5 }))
-      .toBe(' · Alice leder med 10 p');
-  });
-
-  it('picks the highest score when there are many players', () => {
-    const text = buildSessionLeaderText({ Alice: 3, Bob: 12, Carol: 7 });
-    expect(text).toBe(' · Bob leder med 12 p');
-  });
-
-  it('includes 0-point leaders (single player, no rounds scored)', () => {
-    const text = buildSessionLeaderText({ Alice: 0 });
-    expect(text).toBe(' · Alice leder med 0 p');
-  });
-});
-
-// ─── calcTimerState ───────────────────────────────────────────────────────────
-
-describe('calcTimerState', () => {
-  it('has no warnings at full time', () => {
-    const s = calcTimerState(60, 60);
-    expect(s.warn).toBe(false);
-    expect(s.danger).toBe(false);
-    expect(s.pct).toBeCloseTo(1);
-  });
-
-  it('is not warning just above 40 %', () => {
-    // 25/60 ≈ 0.4167
-    const s = calcTimerState(25, 60);
-    expect(s.warn).toBe(false);
-    expect(s.danger).toBe(false);
-  });
-
-  it('enters warn at exactly 40 % (24/60)', () => {
-    const s = calcTimerState(24, 60);
-    expect(s.warn).toBe(true);
-    expect(s.danger).toBe(false);
-  });
-
-  it('is still warn just above 20 % (13/60 ≈ 0.2167)', () => {
-    const s = calcTimerState(13, 60);
-    expect(s.warn).toBe(true);
-    expect(s.danger).toBe(false);
-  });
-
-  it('enters danger at exactly 20 % (12/60)', () => {
-    const s = calcTimerState(12, 60);
-    expect(s.warn).toBe(false);
-    expect(s.danger).toBe(true);
-  });
-
-  it('is danger below 20 %', () => {
-    const s = calcTimerState(5, 60);
-    expect(s.warn).toBe(false);
-    expect(s.danger).toBe(true);
-  });
-
-  it('is danger at 0', () => {
-    const s = calcTimerState(0, 60);
-    expect(s.warn).toBe(false);
-    expect(s.danger).toBe(true);
-  });
-});
-
-// ─── parseFetchMoreResponse ───────────────────────────────────────────────────
-
-describe('parseFetchMoreResponse', () => {
-  it('extracts a plain JSON array', () => {
-    expect(parseFetchMoreResponse('["apple","banana"]'))
-      .toEqual(['apple', 'banana']);
-  });
-
-  it('extracts an array embedded in prose', () => {
-    expect(parseFetchMoreResponse('Here are words: ["apple","banana","cherry"]'))
-      .toEqual(['apple', 'banana', 'cherry']);
-  });
-
-  it('returns [] when no array is found', () => {
-    expect(parseFetchMoreResponse('no array here')).toEqual([]);
-  });
-
-  it('filters out non-string elements', () => {
-    expect(parseFetchMoreResponse('["ok", 42, null, true, "good"]'))
-      .toEqual(['ok', 'good']);
-  });
-
-  it('returns [] on invalid JSON inside brackets', () => {
-    expect(parseFetchMoreResponse('[not valid json]')).toEqual([]);
-  });
-
-  it('handles a multiline array', () => {
-    const text = `[\n  "one",\n  "two"\n]`;
-    expect(parseFetchMoreResponse(text)).toEqual(['one', 'two']);
-  });
-});
-
-// ─── deduplicateWords ─────────────────────────────────────────────────────────
-
-describe('deduplicateWords', () => {
-  it('removes words already in the pool', () => {
-    expect(deduplicateWords(['apple', 'banana'], ['apple'], new Set()))
-      .toEqual(['banana']);
-  });
-
-  it('removes words in globalUsed', () => {
-    expect(deduplicateWords(['apple', 'banana'], [], new Set(['banana'])))
-      .toEqual(['apple']);
-  });
-
-  it('is case-insensitive for pool membership', () => {
-    expect(deduplicateWords(['Apple'], ['apple'], new Set())).toEqual([]);
-  });
-
-  it('is case-insensitive for globalUsed membership', () => {
-    expect(deduplicateWords(['Apple'], [], new Set(['apple']))).toEqual([]);
-  });
-
-  it('keeps words absent from both pool and globalUsed', () => {
-    expect(deduplicateWords(['cherry', 'date'], ['apple'], new Set(['banana'])))
-      .toEqual(['cherry', 'date']);
-  });
-
-  it('accepts globalUsed as a plain array as well as a Set', () => {
-    expect(deduplicateWords(['apple', 'banana'], [], ['banana']))
-      .toEqual(['apple']);
-  });
-
-  it('returns [] when all words are duplicates', () => {
-    expect(deduplicateWords(['a', 'b'], ['a', 'b'], new Set())).toEqual([]);
   });
 });

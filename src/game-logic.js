@@ -1,11 +1,9 @@
-// Pure game logic extracted from index.html.
-// Functions here take all dependencies as parameters so they can be tested
-// without a DOM or global state. Implementations must stay in sync with
-// their counterparts in index.html.
+// Mirrors of selected helpers from index.html, exported so vitest can run them
+// without a DOM. Only helpers whose inline counterpart in index.html shares
+// the same name and (close to) the same body are kept here. When you change
+// one of these, change the inline copy in index.html too.
 
 export const EXHAUSTED = '__EXHAUSTED__';
-
-export const PTS = { easy: 1, medium: 2, hard: 3, barn: 1 };
 
 // ─── Word tracking ───────────────────────────────────────────────────────────
 
@@ -83,23 +81,6 @@ export function pickWord(lang, theme, diff, words, onLowWord = null) {
   return word;
 }
 
-// ─── Scoring ─────────────────────────────────────────────────────────────────
-
-/**
- * Calculate the point result of marking a card right or pass.
- * Returns null when the card is already scored or missing (no-op).
- */
-export function calcMarkCard(card, status) {
-  if (!card || card.status) return null;
-  return { pts: status === 'right' ? (PTS[card.diff] || 1) : 0 };
-}
-
-/** Apply the pass penalty: subtract 1 point, floor at 0. Barnläge has no penalty. */
-export function calcPassPenalty(roundPts, diff = null) {
-  if (diff === 'barn') return roundPts;
-  return Math.max(0, roundPts - 1);
-}
-
 // ─── Stats ───────────────────────────────────────────────────────────────────
 
 export function getStats(lang) {
@@ -122,55 +103,4 @@ export function getTotalRounds(lang) {
 
 export function incRounds(lang) {
   localStorage.setItem(`mao_rounds_${lang}`, getTotalRounds(lang) + 1);
-}
-
-// ─── Session ─────────────────────────────────────────────────────────────────
-
-/**
- * Return the " · Name leder med N p" suffix used in the session-resume banner,
- * or an empty string when scores is empty/null.
- */
-export function buildSessionLeaderText(scores) {
-  const leader = Object.entries(scores || {}).sort((a, b) => b[1] - a[1])[0];
-  return leader ? ` · ${leader[0]} leder med ${leader[1]} p` : '';
-}
-
-// ─── Timer ───────────────────────────────────────────────────────────────────
-
-/**
- * Derive the visual warning state from the current timer value.
- * warn:   40 % ≥ pct > 20 %
- * danger: pct ≤ 20 %
- */
-export function calcTimerState(timerLeft, timerDur) {
-  const pct = timerLeft / timerDur;
-  return {
-    pct,
-    warn: pct <= 0.4 && pct > 0.2,
-    danger: pct <= 0.2,
-  };
-}
-
-// ─── Claude API response helpers ─────────────────────────────────────────────
-
-/**
- * Extract the JSON word array from a raw Claude API response text.
- * Returns [] when no array is found or parsing fails.
- */
-export function parseFetchMoreResponse(text) {
-  const m = text.match(/\[[\s\S]*]/);
-  if (!m) return [];
-  try {
-    return JSON.parse(m[0]).filter(w => typeof w === 'string');
-  } catch { return []; }
-}
-
-/**
- * Filter incoming words down to those not already in the pool or globally used.
- * Case-insensitive on both sides.
- */
-export function deduplicateWords(fresh, existingPool, globalUsed) {
-  const poolSet = new Set(existingPool.map(x => x.toLowerCase()));
-  const usedSet = globalUsed instanceof Set ? globalUsed : new Set(globalUsed);
-  return fresh.filter(w => !poolSet.has(w.toLowerCase()) && !usedSet.has(w.toLowerCase()));
 }
