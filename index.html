@@ -2087,7 +2087,7 @@ function checkSession() {
     const d = JSON.parse(raw);
     if (!d.players || !d.players.length) return;
     const leader = Object.entries(d.scores || {}).sort((a,b) => b[1]-a[1])[0];
-    const leaderText = leader ? ` · ${leader[0]} leder med ${leader[1]} p` : '';
+    const leaderText = leader ? ` · ${esc(leader[0])} leder med ${leader[1]} p` : '';
     const txt = `Pågående spel hittades – runda ${d.round}${leaderText}`;
     document.getElementById('saveBannerText').innerHTML = `<strong>${txt}</strong>`;
     document.getElementById('saveBanner').style.display = 'flex';
@@ -2618,7 +2618,7 @@ function showRoundModal() {
     const row = document.createElement('div');
     row.className = 'standing-row' + (i === 0 ? ' leader' : '');
     row.innerHTML = `<span class="standing-pos">${i+1}.</span>
-      <span class="standing-name">${p}</span>
+      <span class="standing-name">${esc(p)}</span>
       <span class="standing-pts">${S.scores[p]||0}p</span>`;
     st.appendChild(row);
   });
@@ -3151,24 +3151,30 @@ async function mpPost(action, extra = {}) {
 }
 
 async function mpSync() {
-  if (MP.supabase) {
-    const sv = await mpLoadRoom();
-    if (!sv) {
-      document.getElementById('connectingMsg').style.display = 'none';
+  if (MP.syncing) return;
+  MP.syncing = true;
+  try {
+    if (MP.supabase) {
+      const sv = await mpLoadRoom();
+      if (!sv) {
+        document.getElementById('connectingMsg').style.display = 'none';
+        return;
+      }
+      if (sv.version === MP.lastVer) return;
+      MP.lastVer = sv.version;
+      mpHandle(sv);
       return;
     }
-    if (sv.version === MP.lastVer) return;
-    MP.lastVer = sv.version;
-    mpHandle(sv);
-    return;
+    try {
+      const r = await fetch('/state');
+      const sv = await r.json();
+      if (sv.version === MP.lastVer) return;
+      MP.lastVer = sv.version;
+      mpHandle(sv);
+    } catch(e) {}
+  } finally {
+    MP.syncing = false;
   }
-  try {
-    const r = await fetch('/state');
-    const sv = await r.json();
-    if (sv.version === MP.lastVer) return;
-    MP.lastVer = sv.version;
-    mpHandle(sv);
-  } catch(e) {}
 }
 
 function mpHandle(sv) {
@@ -3241,7 +3247,7 @@ function renderDeviceChip() {
   }
 
   if (MP.deviceOwner) {
-    chip.innerHTML = `${DEVICE_GREETING}, <strong>${MP.deviceOwner}</strong> · <span style="text-decoration:underline">byt spelare</span>`;
+    chip.innerHTML = `${DEVICE_GREETING}, <strong>${esc(MP.deviceOwner)}</strong> · <span style="text-decoration:underline">byt spelare</span>`;
     chip.onclick = () => {
       setDeviceOwner(null);
       MP.autoJoinTried = false;
@@ -3427,7 +3433,7 @@ function mpShowSummary(sv) {
     const row = document.createElement('div');
     row.className = 'standing-row' + (i === 0 ? ' leader' : '');
     row.innerHTML = `<span class="standing-pos">${i+1}.</span>
-      <span class="standing-name">${p}</span>
+      <span class="standing-name">${esc(p)}</span>
       <span class="standing-pts">${sv.scores[p] || 0}p</span>`;
     st.appendChild(row);
   });
