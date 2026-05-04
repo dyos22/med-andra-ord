@@ -5,6 +5,11 @@ Ett webbaserat partyspel i en enda HTML-fil.
 Spelet hostas statiskt via GitHub Pages och använder Supabase Realtime för rum,
 spelare och poängsynk.
 
+## Ordlistor
+
+`words.generated.js` byggs med `scripts/generate-wordlists.mjs` från SALDO,
+Flex och SCOWL. Läs mer i `WORDLISTS.md`.
+
 ## Filer
 
 - `index.html` - spelet som GitHub Pages publicerar

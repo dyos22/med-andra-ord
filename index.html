@@ -1186,6 +1186,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="words.generated.js"></script>
 <script>
 // ═══════════════════════════════════════════
 //  SHARED PERSONS DATA (language-independent)
@@ -1295,7 +1296,7 @@ const PERSONS_DATA = {
 // ═══════════════════════════════════════════
 //  WORD LISTS
 // ═══════════════════════════════════════════
-const WORDS = {
+const WORDS = globalThis.MAO_GENERATED_WORDS || {
   sv: {
     standard: {
       easy: [
@@ -1874,7 +1875,12 @@ function pickWord(lang, theme, diff) {
     ? (WORDS[lang][theme]?.barn || WORDS[lang].standard.barn)
     : (WORDS[lang][theme]?.[diff] || WORDS[lang].standard[diff]);
   const used = getGlobalUsed(lang);
-  const avail = pool.filter(w => !used.has(w.toLowerCase()));
+  let activePool = pool;
+  let avail = activePool.filter(w => !used.has(w.toLowerCase()));
+  if (!avail.length && theme !== 'standard') {
+    activePool = diff === 'barn' ? WORDS[lang].standard.barn : WORDS[lang].standard[diff];
+    avail = activePool.filter(w => !used.has(w.toLowerCase()));
+  }
   if (!avail.length) return EXHAUSTED;
   const word = avail[Math.floor(Math.random() * avail.length)];
   markWordUsed(lang, word);

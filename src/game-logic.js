@@ -63,7 +63,12 @@ export function pickWord(lang, theme, diff, words, onLowWord = null) {
     ? (words[lang][theme]?.barn || words[lang].standard.barn)
     : (words[lang][theme]?.[diff] || words[lang].standard[diff]);
   const used = getGlobalUsed(lang);
-  const avail = pool.filter(w => !used.has(w.toLowerCase()));
+  let activePool = pool;
+  let avail = activePool.filter(w => !used.has(w.toLowerCase()));
+  if (!avail.length && theme !== 'standard') {
+    activePool = diff === 'barn' ? words[lang].standard.barn : words[lang].standard[diff];
+    avail = activePool.filter(w => !used.has(w.toLowerCase()));
+  }
   if (!avail.length) return EXHAUSTED;
   const word = avail[Math.floor(Math.random() * avail.length)];
   markWordUsed(lang, word);

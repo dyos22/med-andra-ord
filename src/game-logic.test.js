@@ -134,6 +134,17 @@ describe('pickWord', () => {
     expect(pickWord('sv', 'standard', 'easy', MINI_WORDS)).toBe(EXHAUSTED);
   });
 
+  it('falls back to the standard pool when a theme pool is exhausted', () => {
+    const words = {
+      sv: {
+        standard: { easy: ['alpha'], medium: [], hard: [], barn: ['zeta'] },
+        djur: { easy: ['cat'], medium: [], hard: [], barn: [] },
+      },
+    };
+    markWordUsed('sv', 'cat');
+    expect(pickWord('sv', 'djur', 'easy', words)).toBe('alpha');
+  });
+
   it('uses the barn pool when diff is "barn"', () => {
     expect(pickWord('sv', 'standard', 'barn', MINI_WORDS)).toBe('zeta');
   });
