@@ -1814,6 +1814,44 @@ const S = {
 // ═══════════════════════════════════════════
 const EXHAUSTED = '__EXHAUSTED__';
 
+// Central localStorage-skrivning. iOS Safari i privat läge kastar och
+// alla `try/catch {}` runt om i koden tystar det utan att användaren märker
+// att inget sparas. Här försöker vi trimma mao_used_* en gång och visar
+// sedan en toast om det fortfarande inte rymms.
+let _quotaToastShown = false;
+function isQuotaError(e) {
+  return e && (e.code === 22 || e.code === 1014 || /quota/i.test(e.name || '') || /quota/i.test(e.message || ''));
+}
+function trimUsedWords() {
+  // Halvera båda mao_used_*-listorna så framtida skrivningar får plats.
+  ['sv', 'en'].forEach(lang => {
+    try {
+      const arr = JSON.parse(localStorage.getItem(`mao_used_${lang}`) || '[]');
+      if (Array.isArray(arr) && arr.length > 200) {
+        const trimmed = arr.slice(Math.floor(arr.length / 2));
+        localStorage.setItem(`mao_used_${lang}`, JSON.stringify(trimmed));
+      }
+    } catch {}
+  });
+}
+function safeSet(key, value) {
+  try { localStorage.setItem(key, value); return true; }
+  catch (e) {
+    if (!isQuotaError(e)) return false;
+    trimUsedWords();
+    try { localStorage.setItem(key, value); return true; }
+    catch {
+      if (!_quotaToastShown && typeof toast === 'function') {
+        _quotaToastShown = true;
+        toast(S.lang === 'en'
+          ? 'Browser storage full – progress may not save'
+          : 'Webbläsarens lagring är full – framsteg kanske inte sparas');
+      }
+      return false;
+    }
+  }
+}
+
 function normalizeWordList(words) {
   const seen = new Set();
   (Array.isArray(words) ? words : []).forEach(word => {
@@ -1858,16 +1896,13 @@ function markWordUsed(lang, word) {
   if (word === EXHAUSTED) return;
   const key = String(word || '').trim().toLowerCase();
   if (!key) return;
-  try {
-    const used = getGlobalUsed(lang);
-    used.add(key);
-    localStorage.setItem(`mao_used_${lang}`, JSON.stringify([...used]));
-  } catch {}
-  try {
-    if (MP.supabase && MP.myName) {
-      mpPost('mark_used', { lang, word: key }).catch(() => {});
-    }
-  } catch {}
+  const used = getGlobalUsed(lang);
+  used.add(key);
+  safeSet(`mao_used_${lang}`, JSON.stringify([...used]));
+  // mpPost har inbyggd retry+logg för mark_used; vi behöver inte vänta in det.
+  if (MP.supabase && MP.myName) {
+    try { mpPost('mark_used', { lang, word: key }); } catch (e) { console.warn('[MP] mark_used queue failed', e); }
+  }
 }
 
 function pickWord(lang, theme, diff) {
@@ -1885,15 +1920,18 @@ function pickWord(lang, theme, diff) {
   const word = avail[Math.floor(Math.random() * avail.length)];
   markWordUsed(lang, word);
   const remaining = avail.length - 1;
+  const wk = `mao_warned_${lang}_${theme}_${diff}`;
   if (remaining <= 30) {
-    const wk = `mao_warned_${lang}_${theme}_${diff}`;
     if (!localStorage.getItem(wk)) {
-      localStorage.setItem(wk, '1');
+      try { localStorage.setItem(wk, '1'); } catch {}
       const msg = lang === 'sv'
         ? `Bara ${remaining} ord kvar i "${theme}" (${diff}) – listan behöver bytas ut manuellt!`
         : `Only ${remaining} words left in "${theme}" (${diff}) – list needs manual replacement!`;
       showLowWordBanner(msg);
     }
+  } else if (remaining > 60) {
+    // Poolen har växt (t.ex. via fetchMore eller ny ordlista) – tillåt ny varning senare.
+    try { localStorage.removeItem(wk); } catch {}
   }
   if (remaining < 30 && S.apiKey) fetchMore(lang, theme, diff);
   return word;
@@ -1906,7 +1944,7 @@ function getStats(lang) {
   try { return JSON.parse(localStorage.getItem(`mao_stats_${lang}`) || '{}'); } catch { return {}; }
 }
 function saveStats(lang, stats) {
-  try { localStorage.setItem(`mao_stats_${lang}`, JSON.stringify(stats)); } catch {}
+  safeSet(`mao_stats_${lang}`, JSON.stringify(stats));
 }
 function logPassStat(lang, word) {
   const stats = getStats(lang);
@@ -1951,7 +1989,7 @@ function getRichStats() {
 }
 
 function saveRichStats(stats) {
-  try { localStorage.setItem(RICH_STATS_KEY, JSON.stringify(normalizeRichStats(stats))); } catch {}
+  safeSet(RICH_STATS_KEY, JSON.stringify(normalizeRichStats(stats)));
 }
 
 function mergeRichStats(...sources) {
@@ -2067,14 +2105,17 @@ function pruneGuestStats() {
 //  SESSION SAVE / RESUME
 // ═══════════════════════════════════════════
 function saveSession() {
-  try {
-    localStorage.setItem('mao_session', JSON.stringify({
+  safeSet('mao_session', JSON.stringify({
       players: S.players, scores: S.scores, round: S.round,
       idx: S.idx, theme: S.theme, lang: S.lang,
       timerOn: S.timerOn, timerDur: S.timerDur,
+      barnMode: S.barnMode,
+      currentCards: S.currentCards,
+      roundPts: S.roundPts,
+      roundStartedAt: S.roundStartedAt,
+      timerLeft: S.timerLeft,
       timestamp: Date.now(),
     }));
-  } catch {}
 }
 function clearSession() {
   localStorage.removeItem('mao_session');
@@ -2087,9 +2128,13 @@ function checkSession() {
     const d = JSON.parse(raw);
     if (!d.players || !d.players.length) return;
     const leader = Object.entries(d.scores || {}).sort((a,b) => b[1]-a[1])[0];
-    const leaderText = leader ? ` · ${esc(leader[0])} leder med ${leader[1]} p` : '';
-    const txt = `Pågående spel hittades – runda ${d.round}${leaderText}`;
-    document.getElementById('saveBannerText').innerHTML = `<strong>${txt}</strong>`;
+    const round = Number(d.round) || 1;
+    const leaderText = leader ? ` · ${leader[0]} leder med ${Number(leader[1]) || 0} p` : '';
+    const el = document.getElementById('saveBannerText');
+    el.textContent = '';
+    const strong = document.createElement('strong');
+    strong.textContent = `Pågående spel hittades – runda ${round}${leaderText}`;
+    el.appendChild(strong);
     document.getElementById('saveBanner').style.display = 'flex';
   } catch {}
 }
@@ -2099,8 +2144,34 @@ function resumeSession() {
     S.players = d.players; S.scores = d.scores || {}; S.round = d.round;
     S.idx = d.idx; S.theme = d.theme; S.lang = d.lang;
     S.timerOn = d.timerOn; S.timerDur = d.timerDur;
+    if (typeof d.barnMode === 'boolean') S.barnMode = d.barnMode;
     document.getElementById('saveBanner').style.display = 'none';
-    showGame();
+    if (Array.isArray(d.currentCards) && d.currentCards.length) {
+      // Återställ pågående runda exakt där den var
+      S.currentCards = d.currentCards;
+      S.roundPts = Number(d.roundPts) || 0;
+      S.roundStartedAt = Number(d.roundStartedAt) || Date.now();
+      if (S.timerOn && Number.isFinite(d.timerLeft) && d.timerLeft > 0) S._timerStart = d.timerLeft;
+      showScreen('gameScreen');
+      const t = UI[S.lang];
+      document.getElementById('turnLabel').textContent  = t.turnLabel;
+      document.getElementById('playerName').textContent = S.players[S.idx];
+      document.getElementById('nextBtn').textContent    = t.nextBtn;
+      document.getElementById('homeBtn').textContent    = t.homeBtn;
+      renderScoreBand();
+      const container = document.getElementById('wordCards');
+      container.innerHTML = '';
+      S.currentCards.forEach((c, i) => {
+        const card = buildCard(i, c.diff, c.word);
+        if (c.revealedAt) card.classList.add('revealed');
+        if (c.status === 'right') card.classList.add('scored-right');
+        else if (c.status === 'pass') card.classList.add('scored-pass');
+        container.appendChild(card);
+      });
+      startTimer();
+    } else {
+      showGame();
+    }
   } catch { clearSession(); }
 }
 
@@ -2268,12 +2339,19 @@ function setBarnMode(on, persist = true) {
   if (persist) localStorage.setItem('mao_barn_mode', on ? '1' : '');
 }
 
+// Sparar temat användaren hade *innan* Alva valdes så att vi kan återställa
+// det när Alva avmarkeras, i stället för att tvinga 'standard' på dem.
+let _themeBeforeAlva = null;
 function syncAlvaSettings() {
   if (presetActive.Alva) {
+    if (!S.barnMode) _themeBeforeAlva = S.theme;
     setBarnMode(true);
   } else {
     setBarnMode(false);
-    setTheme('standard');
+    if (_themeBeforeAlva && _themeBeforeAlva !== S.theme) {
+      setTheme(_themeBeforeAlva);
+      _themeBeforeAlva = null;
+    }
   }
 }
 
@@ -2493,17 +2571,21 @@ function buildCard(idx, diff, word) {
     return card;
   }
 
+  const rightAria = S.lang === 'en'
+    ? `Mark word as guessed (+${PTS[isBarn ? 'barn' : diff] || 1} points)`
+    : `Markera ordet som rätt (+${PTS[isBarn ? 'barn' : diff] || 1} poäng)`;
+  const passAria = S.lang === 'en' ? 'Pass this word' : 'Passa det här ordet';
   card.innerHTML = `
     <div class="wc-header">
       <div class="dot"></div>
       <span class="diff-name">${diffLabel}</span>
       <span class="diff-pts">${ptsLabel}</span>
     </div>
-    <div class="word-text">${word}</div>
+    <div class="word-text">${esc(word)}</div>
     <div class="word-hint">${t.reveal}</div>
     <div class="card-actions">
-      <button class="btn-right" onclick="markCard(${idx},'right')">${t.btnRight}</button>
-      <button class="btn-pass"  onclick="passCard(${idx})">${t.btnPass}</button>
+      <button class="btn-right" aria-label="${esc(rightAria)}" onclick="markCard(${idx},'right')">${t.btnRight}</button>
+      <button class="btn-pass" aria-label="${esc(passAria)}" onclick="passCard(${idx})">${t.btnPass}</button>
     </div>
     <div class="scored-label"></div>`;
 
@@ -2558,7 +2640,10 @@ function markCard(idx, status) {
 function passCard(idx) {
   const c = S.currentCards[idx];
   if (!c || c.status) return;
-  if (c.word !== EXHAUSTED) {
+  // Bara räkna pass och straffa om kortet faktiskt har visats för förklararen.
+  // Annars förorenas pass-statistiken av "byte innan visat".
+  const wasRevealed = Boolean(c.revealedAt) && c.word !== EXHAUSTED;
+  if (wasRevealed) {
     logPassStat(S.lang, c.word);
     logWordStat({ player: S.players[S.idx], word: c.word, status: 'pass', diff: c.diff, theme: c.theme });
   }
@@ -2568,7 +2653,7 @@ function passCard(idx) {
     return;
   }
   c.word = newWord; c.status = null; c.theme = S.theme; c.revealedAt = null;
-  if (newWord !== EXHAUSTED && c.diff !== 'barn') S.roundPts = Math.max(0, S.roundPts - 1);
+  if (wasRevealed && newWord !== EXHAUSTED && c.diff !== 'barn') S.roundPts = Math.max(0, S.roundPts - 1);
   const old = document.getElementById(`card_${idx}`);
   const newCard = buildCard(idx, c.diff, newWord);
   if (newWord !== EXHAUSTED) {
@@ -2626,9 +2711,20 @@ function showRoundModal() {
   document.getElementById('roundModal').classList.add('open');
 }
 
+let _closingRound = false;
 function closeRoundModal() {
+  if (_closingRound) return; // skydd mot dubbelklick → idx hoppar över spelare
+  _closingRound = true;
+  const btn = document.getElementById('modalNextBtn');
+  if (btn) btn.disabled = true;
   document.getElementById('roundModal').classList.remove('open');
-  mpPost('next_player').then(() => { MP.lastVer = -1; mpSync(); });
+  Promise.resolve(mpPost('next_player'))
+    .then(() => { MP.lastVer = -1; return mpSync(); })
+    .catch(() => {})
+    .finally(() => {
+      _closingRound = false;
+      if (btn) btn.disabled = false;
+    });
 }
 
 // ═══════════════════════════════════════════
@@ -2639,20 +2735,32 @@ function startTimer() {
   const wrap = document.getElementById('timerWrap');
   if (!S.timerOn) { wrap.classList.remove('visible'); return; }
   wrap.classList.add('visible');
-  S.timerLeft = (S._timerStart !== undefined) ? S._timerStart : S.timerDur;
+  // Räkna från epoch-tid istället för att dekrementera varje sekund.
+  // Tidigare implementation: setInterval-callbacken bromsas till >= 1s i bakgrundsflikar
+  // (Chrome/Safari), så timer:n drev ifrån servern och syntes "frusen" vid återgång.
+  const startSeconds = (S._timerStart !== undefined) ? S._timerStart : S.timerDur;
   delete S._timerStart;
+  S._timerEndsAt = Date.now() + startSeconds * 1000;
+  S.timerLeft = startSeconds;
   updateTimer();
   S.timerTick = setInterval(() => {
-    S.timerLeft--;
-    updateTimer();
-    if (S.timerLeft <= 0) { clearInterval(S.timerTick); onTimeUp(); }
-  }, 1000);
+    const left = Math.max(0, Math.ceil((S._timerEndsAt - Date.now()) / 1000));
+    if (left !== S.timerLeft) {
+      S.timerLeft = left;
+      updateTimer();
+    }
+    if (left <= 0) {
+      clearInterval(S.timerTick);
+      S.timerTick = null;
+      onTimeUp();
+    }
+  }, 250);
 }
 
 function updateTimer() {
   const el   = document.getElementById('timerNum');
   const fill = document.getElementById('timerFill');
-  const pct  = S.timerLeft / S.timerDur;
+  const pct  = S.timerDur > 0 ? S.timerLeft / S.timerDur : 0;
   el.textContent   = S.timerLeft;
   fill.style.width = (pct * 100) + '%';
   const warn = pct <= 0.4 && pct > 0.2, danger = pct <= 0.2;
@@ -2700,8 +2808,10 @@ function pct(part, total) {
 }
 
 function themeName(key) {
+  // Returnera hela labeln (inkl. ev. emoji) – tidigare regex:en strippade
+  // sista "ordet" och var skör för labels utan emoji.
   const themes = S.lang === 'sv' ? THEMES_SV : THEMES_EN;
-  return themes.find(t => t.key === key)?.label.replace(/\s+[^\s]+$/, '') || key;
+  return themes.find(t => t.key === key)?.label || key;
 }
 
 function mergePlayerStats(names, rich) {
@@ -2910,6 +3020,7 @@ function goHome() {
   MP.roundActive = false;
   MP.autoJoinTried = true;
   sessionStorage.removeItem('mao_mp_player');
+  sessionStorage.removeItem('mao_mp_round_active');
   mpPost('go_home').then(() => {
     MP.lastVer = -1;
     mpSync();
@@ -2923,9 +3034,17 @@ function showLowWordBanner(msg) {
   if (old) old.remove();
   const b = document.createElement('div');
   b.id = 'lowWordBanner';
-  b.innerHTML = `<span style="flex:1;line-height:1.5">${msg}</span>
-    <button onclick="document.getElementById('lowWordBanner').remove()"
-      style="background:none;border:none;color:var(--ink);cursor:pointer;font-size:1.2rem;flex-shrink:0;padding:0">×</button>`;
+  const span = document.createElement('span');
+  span.style.cssText = 'flex:1;line-height:1.5';
+  span.textContent = String(msg ?? ''); // textContent → ingen XSS via theme/diff/etc.
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = '×';
+  btn.setAttribute('aria-label', S.lang === 'en' ? 'Close' : 'Stäng');
+  btn.style.cssText = 'background:none;border:none;color:var(--ink);cursor:pointer;font-size:1.2rem;flex-shrink:0;padding:0';
+  btn.onclick = () => b.remove();
+  b.appendChild(span);
+  b.appendChild(btn);
   Object.assign(b.style, {
     position:'fixed', top:'12px', left:'50%', transform:'translateX(-50%)',
     background:'#431407', border:'1px solid #f97316', color:'#fed7aa',
@@ -2957,7 +3076,14 @@ const MP = {
   channel: null,
   sessionId: (() => {
     let id = localStorage.getItem('mao_device_sid');
-    if (!id) { id = Math.random().toString(36).slice(2, 10); localStorage.setItem('mao_device_sid', id); }
+    if (!id) {
+      // Föredra crypto.randomUUID när tillgängligt – Math.random ger bara ~40 bits
+      // och kan kollidera mellan två gäster i samma rum.
+      id = (window.crypto && typeof window.crypto.randomUUID === 'function')
+        ? window.crypto.randomUUID()
+        : Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10);
+      try { localStorage.setItem('mao_device_sid', id); } catch {}
+    }
     return id;
   })(),
   lastVer: -1,
@@ -2968,7 +3094,12 @@ const MP = {
   lastState: null,
   cloudQueue: Promise.resolve(),
 };
-const DEVICE_GREETING = Math.random() < 0.5 ? 'Skit på dig' : 'Känn lugnet';
+// Slumpa hälsning, men aldrig en "vuxen" fras om Alva (barnläge) är aktivt.
+function pickGreeting() {
+  if (S.barnMode) return 'Känn lugnet';
+  return Math.random() < 0.5 ? 'Skit på dig' : 'Känn lugnet';
+}
+let DEVICE_GREETING = pickGreeting();
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -3131,11 +3262,33 @@ async function mpCloudPost(action, extra = {}) {
   return saved ? { ok: true, state: saved } : null;
 }
 
+async function mpCloudPostWithRetry(action, extra) {
+  // Idempotenta åtgärder kan retryas säkert. Score- och end_round-events
+  // är side-effect:fulla (de muterar score/idx) så de retryas inte.
+  const idempotent = action === 'mark_used' || action === 'merge_stats' || action === 'join';
+  const maxAttempts = idempotent ? 3 : 1;
+  let lastErr = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const res = await mpCloudPost(action, extra);
+      if (res) return res;
+      lastErr = new Error(`mpCloudPost(${action}) returned null`);
+    } catch (e) {
+      lastErr = e;
+    }
+    if (attempt < maxAttempts) {
+      await new Promise(r => setTimeout(r, 150 * attempt));
+    }
+  }
+  console.warn('[MP] action failed after retries:', action, lastErr);
+  return null;
+}
+
 async function mpPost(action, extra = {}) {
   if (MP.supabase) {
     const queued = (MP.cloudQueue || Promise.resolve())
       .catch(() => {})
-      .then(() => mpCloudPost(action, extra));
+      .then(() => mpCloudPostWithRetry(action, extra));
     MP.cloudQueue = queued.catch(() => {});
     return queued;
   }
@@ -3152,6 +3305,10 @@ async function mpPost(action, extra = {}) {
 
 async function mpSync() {
   if (MP.syncing) return;
+  // När realtime-channelen är aktiv är polling överflödig (servern pushar
+  // ändringar). Hoppa då — alla "tvingande" anrop sätter MP.lastVer = -1
+  // före mpSync, så de släpps igenom här.
+  if (MP.channel && MP.channel.state === 'joined' && MP.lastVer >= 0) return;
   MP.syncing = true;
   try {
     if (MP.supabase) {
@@ -3184,6 +3341,7 @@ function mpHandle(sv) {
   if (!isActiveRoom(sv)) {
     MP.autoJoinTried = false;
     MP.roundActive = false;
+    sessionStorage.removeItem('mao_mp_round_active');
     modal.classList.remove('open');
     if (!document.getElementById('startScreen').classList.contains('active')) showScreen('startScreen');
     return;
@@ -3198,11 +3356,28 @@ function mpHandle(sv) {
   if (sv.phase === 'waiting_for_round') {
     modal.classList.remove('open');
     MP.roundActive = false;
+    sessionStorage.removeItem('mao_mp_round_active');
     MP.lastEventSeq = null;
     mpShowWaiting(sv, isActive);
   } else if (sv.phase === 'playing') {
     if (isActive && !MP.roundActive) {
+      // Skydd mot F5/refresh mid-round: om en aktiv spelare laddar om sidan
+      // är MP.roundActive false (in-memory), fas är 'playing' och vi skulle
+      // tidigare blint dragit tre nya ord och nollställt poängen.
+      // sessionStorage-flaggan låter oss känna igen detta och bli spectator
+      // tills nästa next_player istället för att stjäla rundan.
+      const wasMidRound = sessionStorage.getItem('mao_mp_round_active') === '1';
+      if (wasMidRound) {
+        // Lämna spelet smidigt: visa spectator-vy. När hosten/aktiv spelare
+        // fortsätter via next_player blir användaren aktiv igen i nästa runda.
+        mpShowSpectator(sv);
+        toast(sv.lang === 'en'
+          ? 'Reconnected as spectator – the active player will end the round'
+          : 'Återansluten som åskådare – aktiv spelare avslutar rundan');
+        return;
+      }
       MP.roundActive = true;
+      sessionStorage.setItem('mao_mp_round_active', '1');
       Object.assign(S, {
         players: sv.players.slice(), scores: { ...sv.scores },
         idx: sv.idx, lang: sv.lang, theme: sv.theme,
@@ -3247,7 +3422,10 @@ function renderDeviceChip() {
   }
 
   if (MP.deviceOwner) {
-    chip.innerHTML = `${DEVICE_GREETING}, <strong>${esc(MP.deviceOwner)}</strong> · <span style="text-decoration:underline">byt spelare</span>`;
+    // Re-evaluera vid varje render så barnläget tystar grova fraser även om
+    // det aktiverats efter sidladdning.
+    if (S.barnMode && DEVICE_GREETING === 'Skit på dig') DEVICE_GREETING = 'Känn lugnet';
+    chip.innerHTML = `${esc(DEVICE_GREETING)}, <strong>${esc(MP.deviceOwner)}</strong> · <span style="text-decoration:underline">byt spelare</span>`;
     chip.onclick = () => {
       setDeviceOwner(null);
       MP.autoJoinTried = false;
@@ -3335,6 +3513,11 @@ function clickNewGame() {
   MP.myName = null;
   sessionStorage.removeItem('mao_mp_player');
   MP.autoJoinTried = false;
+  // Tvinga nästa mpSync att köra mpHandle igen, annars kan användaren fastna
+  // i fel skärm om versionsnumret råkar matcha.
+  MP.lastVer = -1;
+  MP.lastState = null;
+  MP.roundActive = false;
   showScreen('startScreen');
 }
 

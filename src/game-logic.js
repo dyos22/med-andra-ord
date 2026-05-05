@@ -71,12 +71,15 @@ export function pickWord(lang, theme, diff, words, onLowWord = null) {
   const word = avail[Math.floor(Math.random() * avail.length)];
   markWordUsed(lang, word);
   const remaining = avail.length - 1;
-  if (remaining <= 30 && onLowWord) {
-    const wk = `mao_warned_${lang}_${theme}_${diff}`;
-    if (!localStorage.getItem(wk)) {
+  const wk = `mao_warned_${lang}_${theme}_${diff}`;
+  if (remaining <= 30) {
+    if (!localStorage.getItem(wk) && onLowWord) {
       localStorage.setItem(wk, '1');
       onLowWord(remaining, lang, theme, diff);
     }
+  } else if (remaining > 60) {
+    // Poolen har växt sedan senaste varning – tillåt ny varning senare.
+    try { localStorage.removeItem(wk); } catch {}
   }
   return word;
 }

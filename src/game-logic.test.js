@@ -187,6 +187,16 @@ describe('pickWord', () => {
     pickWord('sv', 'standard', 'easy', words, onLow);
     expect(onLow).not.toHaveBeenCalled();
   });
+
+  it('clears the warned flag when the pool grows past 60 again', () => {
+    // Simulera att varning redan utfärdats (t.ex. tidigare session)
+    localStorage.setItem('mao_warned_sv_standard_easy', '1');
+    // Stor pool – >60 ord kvar efter pick → flaggan ska rensas
+    const pool = Array.from({ length: 100 }, (_, i) => `word${i}`);
+    const words = { sv: { standard: { easy: pool, medium: [], hard: [], barn: [] } } };
+    pickWord('sv', 'standard', 'easy', words, () => {});
+    expect(localStorage.getItem('mao_warned_sv_standard_easy')).toBe(null);
+  });
 });
 
 // ─── Stats ────────────────────────────────────────────────────────────────────
