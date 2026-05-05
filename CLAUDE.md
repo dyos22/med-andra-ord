@@ -8,13 +8,13 @@ Multiplayer via Supabase Realtime. Deployad på GitHub Pages — push till `main
 - Live: https://dyos22.github.io/med-andra-ord/
 
 ## Stack
-- Vanilla JS + HTML + CSS (ingen bundler, inga npm-paket i appen)
+- Vanilla JS + HTML + CSS (ingen bundler eller paketmanager i appen)
 - Supabase för multiplayer-rum och realtidssynk
-- Vitest + jsdom för tester
 
 ## Tester
 Verifiera ändringar innan push med den lättaste relevanta kontrollen för ändringen.
 För `index.html`: kör åtminstone syntaxkontroll av inline-JS och gärna en snabb browserkontroll av berört flöde.
+Projektet ska inte använda paketmanager-baserade tester eller installationer.
 
 ## Git
 - Committa och pusha när en uppgift är klar, utan att fråga
@@ -24,7 +24,4 @@ För `index.html`: kör åtminstone syntaxkontroll av inline-JS och gärna en sn
 
 ## Projektstruktur
 - `index.html` — hela appen (spelloik, UI, CSS, multiplayer)
-- `src/game-logic.js` — extraherade pure functions (testbara utan DOM)
-- `src/game-logic.test.js` — testsuite
-- `.claude/hooks/session-start.sh` — kör `npm install` vid sessionsstart
 - `supabase-setup.sql` — databasschema
