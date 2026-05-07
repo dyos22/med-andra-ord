@@ -1089,7 +1089,7 @@ globalThis.MAO_GENERATED_WORDS = {
         "överskott",
         "förfärlig",
         "sommardag",
-        "different",
+        "olikhet",
         "skildring",
         "klarspråk",
         "återskapa",

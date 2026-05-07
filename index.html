@@ -1068,6 +1068,17 @@
               <span id="lblSek">sek</span>
             </div>
           </div>
+
+          <div class="setting-pill">
+            <div class="switch-row">
+              <span class="setting-name" id="lblSameDevice">Samma enhet</span>
+              <label class="switch" aria-label="Flera spelare på samma enhet">
+                <input type="checkbox" id="sameDeviceToggle" onchange="onSameDeviceToggle()">
+                <div class="switch-track"></div>
+                <div class="switch-thumb"></div>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1806,6 +1817,7 @@ const S = {
   apiKey: '',
   fetching: false,
   barnMode: false,
+  sameDeviceMode: false,
   currentCards: [], // [{diff, word, status: null/'right'/'pass'}]
 };
 
@@ -2110,6 +2122,7 @@ function saveSession() {
       idx: S.idx, theme: S.theme, lang: S.lang,
       timerOn: S.timerOn, timerDur: S.timerDur,
       barnMode: S.barnMode,
+      sameDeviceMode: S.sameDeviceMode,
       currentCards: S.currentCards,
       roundPts: S.roundPts,
       roundStartedAt: S.roundStartedAt,
@@ -2145,6 +2158,7 @@ function resumeSession() {
     S.idx = d.idx; S.theme = d.theme; S.lang = d.lang;
     S.timerOn = d.timerOn; S.timerDur = d.timerDur;
     if (typeof d.barnMode === 'boolean') S.barnMode = d.barnMode;
+    if (typeof d.sameDeviceMode === 'boolean') S.sameDeviceMode = d.sameDeviceMode;
     document.getElementById('saveBanner').style.display = 'none';
     if (Array.isArray(d.currentCards) && d.currentCards.length) {
       // Återställ pågående runda exakt där den var
@@ -2225,7 +2239,7 @@ const UI = {
   sv: {
     logoSub: 'Det klassiska ordspelet – nu digitalt',
     lblSettings: 'Inställningar',
-    lblLang: 'Språk', lblTheme: 'Tema', lblPlayers: 'Spelare', lblTimer: 'Timer', lblBarnMode: 'Barnläge',
+    lblLang: 'Språk', lblTheme: 'Tema', lblPlayers: 'Spelare', lblTimer: 'Timer', lblBarnMode: 'Barnläge', lblSameDevice: 'Samma enhet',
     setupOptions: 'Tema & inställningar',
     addBtn: '+ Lägg till gäst', lblSek: 'sek',
     advSummary: 'Avancerade inställningar (Claude API)',
@@ -2265,7 +2279,7 @@ const UI = {
   en: {
     logoSub: 'The classic word game – now digital',
     lblSettings: 'Settings',
-    lblLang: 'Language', lblTheme: 'Theme', lblPlayers: 'Players', lblTimer: 'Timer', lblBarnMode: 'Kids mode',
+    lblLang: 'Language', lblTheme: 'Theme', lblPlayers: 'Players', lblTimer: 'Timer', lblBarnMode: 'Kids mode', lblSameDevice: 'Same device',
     setupOptions: 'Theme & settings',
     addBtn: '+ Add guest', lblSek: 'sec',
     advSummary: 'Advanced settings (Claude API)',
@@ -2419,6 +2433,7 @@ function applyLangUI() {
   document.getElementById('setupOptionsSummary').textContent = t.setupOptions;
   document.getElementById('lblTimer').textContent      = t.lblTimer;
   document.getElementById('lblBarnMode').textContent   = t.lblBarnMode;
+  document.getElementById('lblSameDevice').textContent  = t.lblSameDevice;
   document.getElementById('addPlayerBtn').textContent = t.addBtn;
   document.getElementById('lblSek').textContent     = t.lblSek;
   document.getElementById('startBtn').textContent   = t.startBtn;
@@ -2436,6 +2451,10 @@ function onBarnToggle() {
   setBarnMode(document.getElementById('barnToggle').checked);
 }
 
+function onSameDeviceToggle() {
+  S.sameDeviceMode = document.getElementById('sameDeviceToggle').checked;
+}
+
 function startGame() {
   const players = PRESET_PLAYERS.filter(n => presetActive[n]);
   document.querySelectorAll('.player-row').forEach(row => {
@@ -2448,6 +2467,7 @@ function startGame() {
   }
   S.timerOn  = document.getElementById('timerToggle').checked;
   S.timerDur = Math.max(5, parseInt(document.getElementById('timerSeconds').value) || 60);
+  S.sameDeviceMode = document.getElementById('sameDeviceToggle').checked;
   S.apiKey   = document.getElementById('apiKey').value.trim();
   if (S.apiKey) localStorage.setItem('mao_apikey', S.apiKey);
 
@@ -2460,7 +2480,7 @@ function startGame() {
   const myJoinName = (MP.deviceOwner && players.includes(MP.deviceOwner)) ? MP.deviceOwner : players[0];
   MP.myName = myJoinName;
   sessionStorage.setItem('mao_mp_player', myJoinName);
-  if (PRESET_PLAYERS.includes(myJoinName)) setDeviceOwner(myJoinName);
+  setDeviceOwner(myJoinName);
   MP.autoJoinTried = false;
 
   // Try multiplayer server; fall back to local game if no server available
@@ -2471,6 +2491,7 @@ function startGame() {
     timer_on: S.timerOn,
     timer_dur: S.timerDur,
     barn_mode: S.barnMode,
+    same_device_mode: S.sameDeviceMode,
     used_words: getStoredUsedWordsByLang(),
     rich_stats: getRichStats(),
   })
@@ -3113,6 +3134,7 @@ function mpNewState({
   timer_on = false,
   timer_dur = 60,
   barn_mode = S.barnMode,
+  same_device_mode = S.sameDeviceMode,
   used_words = null,
   rich_stats = null,
 } = {}) {
@@ -3130,6 +3152,7 @@ function mpNewState({
     timer_on,
     timer_dur,
     barn_mode: Boolean(barn_mode),
+    same_device_mode: Boolean(same_device_mode),
     timer_started_at: null,
     round_pts: 0,
     used_words: mergeUsedWords(getStoredUsedWordsByLang(), used_words),
@@ -3338,6 +3361,7 @@ function mpHandle(sv) {
   MP.lastState = sv;
   if (sv.rich_stats) saveRichStats(mergeRichStats(getRichStats(), sv.rich_stats));
   const modal = document.getElementById('roundModal');
+  const sameDeviceMode = Boolean(sv.same_device_mode);
   if (!isActiveRoom(sv)) {
     MP.autoJoinTried = false;
     MP.roundActive = false;
@@ -3346,13 +3370,17 @@ function mpHandle(sv) {
     if (!document.getElementById('startScreen').classList.contains('active')) showScreen('startScreen');
     return;
   }
+  if (sameDeviceMode && (!MP.myName || !sv.players.includes(MP.myName))) {
+    MP.myName = sv.players[sv.idx] || sv.players[0];
+    if (MP.myName) sessionStorage.setItem('mao_mp_player', MP.myName);
+  }
   if (!MP.myName || !sv.players.includes(MP.myName)) {
     modal.classList.remove('open');
     MP.roundActive = false;
     mpShowLogin(sv);
     return;
   }
-  const isActive = sv.players[sv.idx] === MP.myName;
+  const isActive = sameDeviceMode || sv.players[sv.idx] === MP.myName;
   if (sv.phase === 'waiting_for_round') {
     modal.classList.remove('open');
     MP.roundActive = false;
@@ -3367,7 +3395,7 @@ function mpHandle(sv) {
       // sessionStorage-flaggan låter oss känna igen detta och bli spectator
       // tills nästa next_player istället för att stjäla rundan.
       const wasMidRound = sessionStorage.getItem('mao_mp_round_active') === '1';
-      if (wasMidRound) {
+      if (wasMidRound && !sameDeviceMode) {
         // Lämna spelet smidigt: visa spectator-vy. När hosten/aktiv spelare
         // fortsätter via next_player blir användaren aktiv igen i nästa runda.
         mpShowSpectator(sv);
@@ -3382,7 +3410,7 @@ function mpHandle(sv) {
         players: sv.players.slice(), scores: { ...sv.scores },
         idx: sv.idx, lang: sv.lang, theme: sv.theme,
         timerOn: sv.timer_on, timerDur: sv.timer_dur,
-        barnMode: Boolean(sv.barn_mode), roundPts: 0,
+        barnMode: Boolean(sv.barn_mode), sameDeviceMode, roundPts: 0,
       });
       if (sv.timer_on && sv.timer_remaining != null)
         S._timerStart = Math.round(sv.timer_remaining);
@@ -3401,9 +3429,23 @@ function mpHandle(sv) {
 
 function setDeviceOwner(name) {
   MP.deviceOwner = name;
-  if (name) localStorage.setItem('mao_device_owner', name);
+  if (name) {
+    safeSet('mao_device_owner', name);
+    rememberDeviceOwner(name);
+  }
   else localStorage.removeItem('mao_device_owner');
   renderDeviceChip();
+}
+
+function rememberDeviceOwner(name) {
+  const key = 'mao_device_owner_history';
+  try {
+    const now = Date.now();
+    const history = JSON.parse(localStorage.getItem(key) || '[]')
+      .filter(item => item?.name && item.name !== name);
+    history.unshift({ name, lastSeen: now });
+    safeSet(key, JSON.stringify(history.slice(0, 12)));
+  } catch {}
 }
 
 function renderDeviceChip() {
@@ -3491,7 +3533,7 @@ function mpShowLogin(sv) {
         if (res && res.ok) {
           MP.myName = name;
           sessionStorage.setItem('mao_mp_player', name);
-          if (PRESET_PLAYERS.includes(name)) setDeviceOwner(name);
+          setDeviceOwner(name);
           MP.lastVer = -1;
           mpSync();
         } else {

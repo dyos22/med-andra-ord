@@ -88,6 +88,7 @@ function newState(extra = {}) {
     timer_on: Boolean(extra.timer_on),
     timer_dur: Number(extra.timer_dur) || 60,
     barn_mode: Boolean(extra.barn_mode),
+    same_device_mode: Boolean(extra.same_device_mode),
     timer_started_at: null,
     round_pts: 0,
     used_words: mergeUsedWords(extra.used_words),

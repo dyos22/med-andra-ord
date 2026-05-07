@@ -15,6 +15,7 @@ Multiplayer via Supabase Realtime. Deployad på GitHub Pages — push till `main
 Verifiera ändringar innan push med den lättaste relevanta kontrollen för ändringen.
 För `index.html`: kör åtminstone syntaxkontroll av inline-JS och gärna en snabb browserkontroll av berört flöde.
 Projektet ska inte använda paketmanager-baserade tester eller installationer.
+För ordlisteändringar: kör `node scripts/check-wordlists.mjs`.
 
 ### Lokal testserver
 
@@ -38,5 +39,6 @@ avslutad kontroll.
 
 ## Projektstruktur
 - `index.html` — hela appen (spelloik, UI, CSS, multiplayer)
+- `scripts/check-wordlists.mjs` — enkel språk-/sanitetskontroll av genererade ordlistor
 - `scripts/local-test-server.mjs` — temporär lokal server för browser- och multiplayerkontroller
 - `supabase-setup.sql` — databasschema

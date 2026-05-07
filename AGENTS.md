@@ -3,6 +3,7 @@
 Svara alltid på svenska.
 
 Det här projektet är en statisk webbapp i `index.html`. Använd inte paketmanager-baserade tester eller installationer. Verifiera i stället med den lättaste relevanta kontrollen för ändringen: syntaxkontroll av berörd JavaScript och browserkontroll av berört flöde.
+Vid ändringar i ordlistor: kör `node scripts/check-wordlists.mjs`.
 
 ## Lokal testserver
 
