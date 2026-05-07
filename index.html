@@ -1084,8 +1084,6 @@
     </div>
   </details>
 
-  <input type="hidden" id="apiKey" autocomplete="off">
-
   <button class="btn-primary" onclick="startGame()" id="startBtn">Starta spelet!</button>
   <div class="stats-link" id="statsLink" onclick="showStats()">titta på statistik</div>
 </div>
@@ -1814,8 +1812,6 @@ const S = {
   timerDur: 60,
   timerLeft: 60,
   timerTick: null,
-  apiKey: '',
-  fetching: false,
   barnMode: false,
   sameDeviceMode: false,
   currentCards: [], // [{diff, word, status: null/'right'/'pass'}]
@@ -1942,10 +1938,9 @@ function pickWord(lang, theme, diff) {
       showLowWordBanner(msg);
     }
   } else if (remaining > 60) {
-    // Poolen har växt (t.ex. via fetchMore eller ny ordlista) – tillåt ny varning senare.
+    // Poolen har växt (ny ordlista) – tillåt ny varning senare.
     try { localStorage.removeItem(wk); } catch {}
   }
-  if (remaining < 30 && S.apiKey) fetchMore(lang, theme, diff);
   return word;
 }
 
@@ -2033,9 +2028,21 @@ function saveAndSyncRichStats(stats) {
   saveRichStats(stats);
   try {
     if (MP.supabase && MP.myName && isActiveRoom(MP.lastState)) {
-      mpPost('merge_stats', { rich_stats: stats }).catch(() => {});
+      mpPost('merge_stats', { rich_stats: stats }).catch(() => {
+        // Markera dirty så nästa lyckade sync skickar igen.
+        MP._statsDirty = true;
+      });
     }
   } catch {}
+}
+
+function flushDirtyStats() {
+  if (!MP._statsDirty) return;
+  if (!(MP.supabase && MP.myName && isActiveRoom(MP.lastState))) return;
+  MP._statsDirty = false;
+  mpPost('merge_stats', { rich_stats: getRichStats() }).catch(() => {
+    MP._statsDirty = true;
+  });
 }
 
 function ensurePlayerStats(stats, player) {
@@ -2130,6 +2137,7 @@ function saveSession() {
       timestamp: Date.now(),
     }));
 }
+const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24h
 function clearSession() {
   localStorage.removeItem('mao_session');
   document.getElementById('saveBanner').style.display = 'none';
@@ -2140,13 +2148,18 @@ function checkSession() {
     if (!raw) return;
     const d = JSON.parse(raw);
     if (!d.players || !d.players.length) return;
+    if (d.timestamp && Date.now() - d.timestamp > SESSION_MAX_AGE_MS) {
+      localStorage.removeItem('mao_session');
+      return;
+    }
+    const t = UI[S.lang];
     const leader = Object.entries(d.scores || {}).sort((a,b) => b[1]-a[1])[0];
     const round = Number(d.round) || 1;
-    const leaderText = leader ? ` · ${leader[0]} leder med ${Number(leader[1]) || 0} p` : '';
+    const leaderText = leader ? t.sessionLeader(leader[0], Number(leader[1]) || 0) : '';
     const el = document.getElementById('saveBannerText');
     el.textContent = '';
     const strong = document.createElement('strong');
-    strong.textContent = `Pågående spel hittades – runda ${round}${leaderText}`;
+    strong.textContent = t.sessionFound(round, leaderText);
     el.appendChild(strong);
     document.getElementById('saveBanner').style.display = 'flex';
   } catch {}
@@ -2154,6 +2167,10 @@ function checkSession() {
 function resumeSession() {
   try {
     const d = JSON.parse(localStorage.getItem('mao_session'));
+    if (d && d.timestamp && Date.now() - d.timestamp > SESSION_MAX_AGE_MS) {
+      clearSession();
+      return;
+    }
     S.players = d.players; S.scores = d.scores || {}; S.round = d.round;
     S.idx = d.idx; S.theme = d.theme; S.lang = d.lang;
     S.timerOn = d.timerOn; S.timerDur = d.timerDur;
@@ -2190,49 +2207,6 @@ function resumeSession() {
 }
 
 // ═══════════════════════════════════════════
-//  CLAUDE API
-// ═══════════════════════════════════════════
-async function fetchMore(lang, theme, diff) {
-  if (S.fetching) return;
-  S.fetching = true;
-  const ln = lang === 'sv' ? 'Swedish' : 'English';
-  const dn = { easy:'easy', medium:'medium', hard:'hard' }[diff];
-  try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': S.apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 600,
-        messages: [{ role: 'user', content:
-          `Generate exactly 50 unique ${ln} words/phrases for a word-guessing game (like Taboo/Alias) ` +
-          `in the category "${theme}" at ${dn} difficulty. ` +
-          `Return ONLY a raw JSON array of strings, nothing else.` }]
-      })
-    });
-    if (!r.ok) throw new Error(r.status);
-    const d = await r.json();
-    const m = d.content[0].text.match(/\[[\s\S]*]/);
-    if (!m) throw new Error('no array');
-    const fresh = JSON.parse(m[0]).filter(w => typeof w === 'string');
-    const pool = diff === 'barn'
-      ? (WORDS[lang][theme]?.barn || WORDS[lang].standard.barn)
-      : WORDS[lang][theme][diff];
-    const existingPool = new Set(pool.map(x => x.toLowerCase()));
-    const globalUsed = getGlobalUsed(lang);
-    const added = fresh.filter(w => !existingPool.has(w.toLowerCase()) && !globalUsed.has(w.toLowerCase()));
-    pool.push(...added);
-    toast(lang === 'sv' ? `+${added.length} nya ord från Claude!` : `+${added.length} new words from Claude!`);
-  } catch (e) { console.warn('Claude fetch failed', e); }
-  finally { S.fetching = false; }
-}
-
-// ═══════════════════════════════════════════
 //  UI STRINGS
 // ═══════════════════════════════════════════
 const UI = {
@@ -2242,9 +2216,6 @@ const UI = {
     lblLang: 'Språk', lblTheme: 'Tema', lblPlayers: 'Spelare', lblTimer: 'Timer', lblBarnMode: 'Barnläge', lblSameDevice: 'Samma enhet',
     setupOptions: 'Tema & inställningar',
     addBtn: '+ Lägg till gäst', lblSek: 'sek',
-    advSummary: 'Avancerade inställningar (Claude API)',
-    lblApiKey: 'Claude API-nyckel (valfritt)',
-    apiHelp: 'Om du klistrar in en API-nyckel hämtas nya ord automatiskt från Claude när den inbyggda listan börjar ta slut. Nyckeln sparas bara i din webbläsare.',
     startBtn: 'Starta spelet!',
     turnLabel: 'Det är din tur',
     nextBtn: 'avsluta runda →',
@@ -2275,6 +2246,11 @@ const UI = {
     clearStats: 'Nollställ statistik',
     statsLink: 'titta på statistik',
     statsMeta: (rounds) => `${rounds} rundor spelade totalt · Mest passade ord:`,
+    welcome: 'Välkommen!',
+    switchPlayer: 'byt spelare',
+    dateMissing: 'datum saknas',
+    sessionFound: (round, leaderText) => `Pågående spel hittades – runda ${round}${leaderText}`,
+    sessionLeader: (name, pts) => ` · ${name} leder med ${pts} p`,
   },
   en: {
     logoSub: 'The classic word game – now digital',
@@ -2282,9 +2258,6 @@ const UI = {
     lblLang: 'Language', lblTheme: 'Theme', lblPlayers: 'Players', lblTimer: 'Timer', lblBarnMode: 'Kids mode', lblSameDevice: 'Same device',
     setupOptions: 'Theme & settings',
     addBtn: '+ Add guest', lblSek: 'sec',
-    advSummary: 'Advanced settings (Claude API)',
-    lblApiKey: 'Claude API key (optional)',
-    apiHelp: 'Paste an API key and Claude will automatically generate new words when the built-in list runs low. The key is only stored in your browser.',
     startBtn: 'Start game!',
     turnLabel: "It's your turn",
     nextBtn: 'end round →',
@@ -2315,6 +2288,11 @@ const UI = {
     clearStats: 'Clear statistics',
     statsLink: 'look at statistics',
     statsMeta: (rounds) => `${rounds} rounds played total · Most passed words:`,
+    welcome: 'Welcome!',
+    switchPlayer: 'switch player',
+    dateMissing: 'date missing',
+    sessionFound: (round, leaderText) => `Game in progress – round ${round}${leaderText}`,
+    sessionLeader: (name, pts) => ` · ${name} leads with ${pts} p`,
   },
 };
 
@@ -2455,7 +2433,9 @@ function onSameDeviceToggle() {
   S.sameDeviceMode = document.getElementById('sameDeviceToggle').checked;
 }
 
+let _starting = false;
 function startGame() {
+  if (_starting) return;
   const players = PRESET_PLAYERS.filter(n => presetActive[n]);
   document.querySelectorAll('.player-row').forEach(row => {
     const v = row.querySelector('input').value.trim();
@@ -2465,11 +2445,14 @@ function startGame() {
     toast(S.lang === 'sv' ? 'Välj minst en spelare' : 'Choose at least one player');
     return;
   }
+  _starting = true;
+  const startBtn = document.getElementById('startBtn');
+  if (startBtn) startBtn.disabled = true;
+  const releaseStart = () => { _starting = false; if (startBtn) startBtn.disabled = false; };
+
   S.timerOn  = document.getElementById('timerToggle').checked;
   S.timerDur = Math.max(5, parseInt(document.getElementById('timerSeconds').value) || 60);
   S.sameDeviceMode = document.getElementById('sameDeviceToggle').checked;
-  S.apiKey   = document.getElementById('apiKey').value.trim();
-  if (S.apiKey) localStorage.setItem('mao_apikey', S.apiKey);
 
   // Always set local state so offline/local play always works
   S.players = players;
@@ -2497,7 +2480,6 @@ function startGame() {
   })
     .then(res => {
       if (res) {
-        // Server responded — sync multiplayer state
         return mpPost('join', {
           player: myJoinName,
           session_id: MP.sessionId,
@@ -2506,10 +2488,14 @@ function startGame() {
         })
           .then(() => { MP.lastVer = -1; mpSync(); });
       } else {
-        // No server — start local game directly
         showGame();
       }
-    });
+    })
+    .catch(err => {
+      console.warn('startGame failed', err);
+      toast(S.lang === 'sv' ? 'Kunde inte starta — försök igen' : 'Could not start — try again');
+    })
+    .finally(releaseStart);
 }
 
 // ═══════════════════════════════════════════
@@ -2809,7 +2795,7 @@ function fmtMs(ms) {
 }
 
 function fmtStamp(ts) {
-  if (!ts) return 'datum saknas';
+  if (!ts) return UI[S.lang].dateMissing;
   const d = new Date(ts);
   const yy = String(d.getFullYear()).slice(-2);
   const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -3307,12 +3293,24 @@ async function mpCloudPostWithRetry(action, extra) {
   return null;
 }
 
+// Anrop som triggar toast om de misslyckas (efter retries). Övriga (mark_used,
+// merge_stats, score_event, go_home m.fl.) är tysta — de är antingen idempotenta
+// eller har egen synk vid nästa polling.
+const MP_CRITICAL_ACTIONS = new Set(['setup', 'join', 'start_round', 'end_round', 'next_player']);
+
 async function mpPost(action, extra = {}) {
   if (MP.supabase) {
     const queued = (MP.cloudQueue || Promise.resolve())
       .catch(() => {})
       .then(() => mpCloudPostWithRetry(action, extra));
     MP.cloudQueue = queued.catch(() => {});
+    if (MP_CRITICAL_ACTIONS.has(action)) {
+      queued.catch(() => {
+        toast(S.lang === 'sv'
+          ? 'Synkfel — kontrollera nätet'
+          : 'Sync error — check your connection');
+      });
+    }
     return queued;
   }
   try {
@@ -3321,9 +3319,19 @@ async function mpPost(action, extra = {}) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, ...extra }),
     });
-    if (!r.ok) return null;
+    if (!r.ok) {
+      if (MP_CRITICAL_ACTIONS.has(action)) {
+        toast(S.lang === 'sv' ? 'Synkfel — kontrollera nätet' : 'Sync error — check your connection');
+      }
+      return null;
+    }
     return await r.json();
-  } catch(e) { return null; }
+  } catch(e) {
+    if (MP_CRITICAL_ACTIONS.has(action)) {
+      toast(S.lang === 'sv' ? 'Synkfel — kontrollera nätet' : 'Sync error — check your connection');
+    }
+    return null;
+  }
 }
 
 async function mpSync() {
@@ -3354,6 +3362,7 @@ async function mpSync() {
     } catch(e) {}
   } finally {
     MP.syncing = false;
+    flushDirtyStats();
   }
 }
 
@@ -3467,7 +3476,7 @@ function renderDeviceChip() {
     // Re-evaluera vid varje render så barnläget tystar grova fraser även om
     // det aktiverats efter sidladdning.
     if (S.barnMode && DEVICE_GREETING === 'Skit på dig') DEVICE_GREETING = 'Känn lugnet';
-    chip.innerHTML = `${esc(DEVICE_GREETING)}, <strong>${esc(MP.deviceOwner)}</strong> · <span style="text-decoration:underline">byt spelare</span>`;
+    chip.innerHTML = `${esc(DEVICE_GREETING)}, <strong>${esc(MP.deviceOwner)}</strong> · <span style="text-decoration:underline">${esc(UI[S.lang].switchPlayer)}</span>`;
     chip.onclick = () => {
       setDeviceOwner(null);
       MP.autoJoinTried = false;
@@ -3476,7 +3485,7 @@ function renderDeviceChip() {
       mpSync();
     };
   } else {
-    chip.textContent = 'Välkommen!';
+    chip.textContent = UI[S.lang].welcome;
     chip.onclick = null;
   }
 }
@@ -3668,8 +3677,7 @@ function mpShowSummary(sv) {
 // ═══════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════
-const savedKey = localStorage.getItem('mao_apikey');
-if (savedKey) { document.getElementById('apiKey').value = savedKey; S.apiKey = savedKey; }
+try { localStorage.removeItem('mao_apikey'); } catch {}
 const savedBarn = localStorage.getItem('mao_barn_mode');
 if (savedBarn) setBarnMode(true, false);
 renderThemeGrid();
@@ -3678,7 +3686,28 @@ syncAlvaSettings();
 renderPresets();
 renderDeviceChip();
 mpSubscribe();
-setInterval(mpSync, 750);
+
+// Pausa polling i bakgrundsflik för att spara batteri och Supabase-quota.
+const MP_SYNC_INTERVAL_MS = 750;
+let _mpSyncTimer = null;
+function startMpSyncTimer() {
+  if (_mpSyncTimer) return;
+  _mpSyncTimer = setInterval(mpSync, MP_SYNC_INTERVAL_MS);
+}
+function stopMpSyncTimer() {
+  if (!_mpSyncTimer) return;
+  clearInterval(_mpSyncTimer);
+  _mpSyncTimer = null;
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    stopMpSyncTimer();
+  } else {
+    startMpSyncTimer();
+    mpSync(); // catch-up direkt vid återgång
+  }
+});
+startMpSyncTimer();
 mpSync();
 </script>
 </body>
