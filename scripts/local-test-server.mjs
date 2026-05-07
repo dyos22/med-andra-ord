@@ -132,6 +132,7 @@ function handleAction(body = {}) {
     next.used_words = mergeUsedWords(next.used_words, body.used_words);
     next.rich_stats = mergeRichStats(next.rich_stats, body.rich_stats);
   } else if (action === 'start_round') {
+    if (next.phase !== 'waiting_for_round') return { ok: true, state: withTimer(state) };
     next.phase = 'playing';
     next.round_pts = 0;
     next.timer_started_at = next.timer_on ? new Date().toISOString() : null;
@@ -147,6 +148,7 @@ function handleAction(body = {}) {
   } else if (action === 'clear_stats') {
     next.rich_stats = emptyRichStats();
   } else if (action === 'end_round') {
+    if (next.phase !== 'playing') return { ok: true, state: withTimer(state) };
     const player = next.players[next.idx];
     const pts = Number(body.round_pts) || 0;
     next.scores = { ...(next.scores || {}), [player]: ((next.scores || {})[player] || 0) + pts };
@@ -155,6 +157,7 @@ function handleAction(body = {}) {
     next.phase = 'round_summary';
     next.timer_started_at = null;
   } else if (action === 'next_player') {
+    if (next.phase !== 'round_summary') return { ok: true, state: withTimer(state) };
     next.idx = next.players.length ? (next.idx + 1) % next.players.length : 0;
     next.phase = 'waiting_for_round';
     next.round_pts = 0;

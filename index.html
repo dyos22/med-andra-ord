@@ -69,8 +69,8 @@
       width: 2px; background: var(--pink-deep); opacity: 0.32; pointer-events: none;
     }
     .screen {
-      display: none; width: 100%; max-width: 480px;
-      padding: 54px 18px 56px; flex-direction: column; gap: 18px;
+      display: none; width: 100%; max-width: min(480px, calc(100vw - 16px));
+      padding: 54px 14px 56px; flex-direction: column; gap: 18px;
       animation: fadeIn 0.35s ease; position: relative; z-index: 2;
     }
     .screen.active { display: flex; }
@@ -430,6 +430,11 @@
     .btn-primary:hover { transform: translate(-2px,-2px) rotate(0deg); box-shadow: 5px 6px 0 var(--ink); }
     .btn-primary:hover::after { transform: translateX(4px); }
     .btn-primary:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
+    .btn-primary.time-up {
+      background: var(--pink-deep);
+      color: var(--paper);
+      animation: pulseBtn 1s ease-in-out infinite;
+    }
     .btn-secondary {
       background: var(--paper); color: var(--ink);
       border: 2px solid var(--ink); border-radius: 14px;
@@ -528,6 +533,8 @@
     /* TIMER */
     .timer-wrap { display: none; padding: 6px 0; }
     .timer-wrap.visible { display: block; }
+    .timer-wrap.time-up .timer-num { color: var(--pink-deep); animation: none; }
+    .timer-wrap.time-up .timer-track { border-color: var(--pink-deep); }
     .timer-num {
       text-align: center; font-family: var(--font-title);
       font-size: 3.8rem; font-weight: 400;
@@ -552,7 +559,10 @@
     .timer-fill.danger { background: var(--pink-deep); }
 
     /* WORD CARDS */
-    .word-cards { display: flex; flex-direction: column; gap: 18px; counter-reset: wordcard; }
+    .word-cards {
+      display: flex; flex-direction: column; gap: 18px; counter-reset: wordcard;
+      padding-right: 4px;
+    }
     .word-card {
       padding: 24px 14px 14px;
       user-select: none; transition: transform 0.18s, box-shadow 0.18s;
@@ -981,6 +991,7 @@
     .pop { animation: pop 0.32s ease; }
     @keyframes shake { 0%,100% { transform:translateX(0) rotate(0); } 20%,60% { transform:translateX(-7px) rotate(-1deg); } 40%,80% { transform:translateX(7px) rotate(1deg); } }
     .shake { animation: shake 0.45s ease; }
+    @keyframes pulseBtn { 0%,100% { transform: rotate(-1deg); } 50% { transform: translate(-1px,-1px) rotate(0deg); } }
 
     .screen::before {
       content: "";
@@ -1037,7 +1048,7 @@
         <div class="settings-grid">
           <div class="setting-pill">
             <span class="setting-name sr-only" id="lblLang">Språk</span>
-            <div class="toggle-group lang-toggle" aria-label="Välj språk">
+            <div class="toggle-group lang-toggle" id="langToggleGroup" aria-label="Välj språk">
               <button class="toggle-btn lang-flag active" id="btnSv" onclick="setLang('sv',this)" aria-label="Svenska" title="Svenska">🇸🇪</button>
               <button class="toggle-btn lang-flag"        id="btnEn" onclick="setLang('en',this)" aria-label="English" title="English">🇬🇧</button>
             </div>
@@ -1046,7 +1057,7 @@
           <div class="setting-pill">
             <div class="switch-row">
               <span class="setting-name" id="lblBarnMode">Barnläge</span>
-              <label class="switch" aria-label="Barnläge">
+              <label class="switch" id="barnSwitch" aria-label="Barnläge">
                 <input type="checkbox" id="barnToggle" onchange="onBarnToggle()">
                 <div class="switch-track"></div>
                 <div class="switch-thumb"></div>
@@ -1057,7 +1068,7 @@
           <div class="setting-pill timer-setting">
             <div class="switch-row">
               <span class="setting-name" id="lblTimer">Timer</span>
-              <label class="switch" aria-label="Timer">
+              <label class="switch" id="timerSwitch" aria-label="Timer">
                 <input type="checkbox" id="timerToggle" onchange="onTimerToggle()">
                 <div class="switch-track"></div>
                 <div class="switch-thumb"></div>
@@ -1072,7 +1083,7 @@
           <div class="setting-pill">
             <div class="switch-row">
               <span class="setting-name" id="lblSameDevice">Samma enhet</span>
-              <label class="switch" aria-label="Flera spelare på samma enhet">
+              <label class="switch" id="sameDeviceSwitch" aria-label="Flera spelare på samma enhet">
                 <input type="checkbox" id="sameDeviceToggle" onchange="onSameDeviceToggle()">
                 <div class="switch-track"></div>
                 <div class="switch-thumb"></div>
@@ -1812,6 +1823,7 @@ const S = {
   timerDur: 60,
   timerLeft: 60,
   timerTick: null,
+  timeUp: false,
   barnMode: false,
   sameDeviceMode: false,
   currentCards: [], // [{diff, word, status: null/'right'/'pass'}]
@@ -1962,7 +1974,7 @@ function getTotalRounds(lang) {
   try { return parseInt(localStorage.getItem(`mao_rounds_${lang}`) || '0'); } catch { return 0; }
 }
 function incRounds(lang) {
-  localStorage.setItem(`mao_rounds_${lang}`, getTotalRounds(lang) + 1);
+  safeSet(`mao_rounds_${lang}`, String(getTotalRounds(lang) + 1));
 }
 
 const RICH_STATS_KEY = 'mao_rich_stats_v1';
@@ -2152,7 +2164,8 @@ function checkSession() {
       localStorage.removeItem('mao_session');
       return;
     }
-    const t = UI[S.lang];
+    const savedLang = d.lang === 'en' ? 'en' : 'sv';
+    const t = UI[savedLang];
     const leader = Object.entries(d.scores || {}).sort((a,b) => b[1]-a[1])[0];
     const round = Number(d.round) || 1;
     const leaderText = leader ? t.sessionLeader(leader[0], Number(leader[1]) || 0) : '';
@@ -2224,6 +2237,8 @@ const UI = {
     diffs: { easy:'Lätt', medium:'Medel', hard:'Svår', barn:'Barnkort', person:'Person' },
     pts: { easy:'1 poäng', medium:'2 poäng', hard:'3 poäng', barn:'1 poäng' },
     timeUp: 'Tiden är ute!',
+    timeUpEndBtn: 'Tiden är slut – avsluta rundan',
+    timeUpLocked: 'Tiden är slut – avsluta rundan först',
     btnRight: 'rätt!',
     btnPass: 'passa',
     scoredRight: 'rätt!',
@@ -2249,6 +2264,11 @@ const UI = {
     welcome: 'Välkommen!',
     switchPlayer: 'byt spelare',
     dateMissing: 'datum saknas',
+    ariaLang: 'Välj språk',
+    ariaBarnMode: 'Barnläge',
+    ariaTimer: 'Timer',
+    ariaSameDevice: 'Flera spelare på samma enhet',
+    ariaSeconds: 'Sekunder',
     sessionFound: (round, leaderText) => `Pågående spel hittades – runda ${round}${leaderText}`,
     sessionLeader: (name, pts) => ` · ${name} leder med ${pts} p`,
   },
@@ -2266,6 +2286,8 @@ const UI = {
     diffs: { easy:'Easy', medium:'Medium', hard:'Hard', barn:'Kids card', person:'Person' },
     pts: { easy:'1 point', medium:'2 points', hard:'3 points', barn:'1 point' },
     timeUp: 'Time is up!',
+    timeUpEndBtn: "Time's up – end round",
+    timeUpLocked: "Time's up – end the round first",
     btnRight: 'right!',
     btnPass: 'pass',
     scoredRight: 'right!',
@@ -2291,6 +2313,11 @@ const UI = {
     welcome: 'Welcome!',
     switchPlayer: 'switch player',
     dateMissing: 'date missing',
+    ariaLang: 'Choose language',
+    ariaBarnMode: 'Kids mode',
+    ariaTimer: 'Timer',
+    ariaSameDevice: 'Multiple players on one device',
+    ariaSeconds: 'Seconds',
     sessionFound: (round, leaderText) => `Game in progress – round ${round}${leaderText}`,
     sessionLeader: (name, pts) => ` · ${name} leads with ${pts} p`,
   },
@@ -2328,7 +2355,7 @@ function renderPresets() {
 function setBarnMode(on, persist = true) {
   S.barnMode = on;
   document.getElementById('barnToggle').checked = on;
-  if (persist) localStorage.setItem('mao_barn_mode', on ? '1' : '');
+  if (persist) safeSet('mao_barn_mode', on ? '1' : '');
 }
 
 // Sparar temat användaren hade *innan* Alva valdes så att vi kan återställa
@@ -2417,6 +2444,11 @@ function applyLangUI() {
   document.getElementById('startBtn').textContent   = t.startBtn;
   document.getElementById('statsLink').textContent  = t.statsLink;
   document.getElementById('statsTitle').textContent = t.statsTitle;
+  document.getElementById('langToggleGroup').setAttribute('aria-label', t.ariaLang);
+  document.getElementById('barnSwitch').setAttribute('aria-label', t.ariaBarnMode);
+  document.getElementById('timerSwitch').setAttribute('aria-label', t.ariaTimer);
+  document.getElementById('sameDeviceSwitch').setAttribute('aria-label', t.ariaSameDevice);
+  document.getElementById('timerSeconds').setAttribute('aria-label', t.ariaSeconds);
 }
 
 function onTimerToggle() {
@@ -2524,12 +2556,18 @@ function renderScoreBand() {
 
 function renderRound() {
   const t = UI[S.lang];
+  const nextBtn = document.getElementById('nextBtn');
   document.getElementById('turnLabel').textContent  = t.turnLabel;
   document.getElementById('playerName').textContent = S.players[S.idx];
-  document.getElementById('nextBtn').textContent    = t.nextBtn;
+  nextBtn.textContent = t.nextBtn;
+  nextBtn.classList.remove('time-up');
+  nextBtn.disabled = false;
   document.getElementById('homeBtn').textContent    = t.homeBtn;
+  document.getElementById('timerWrap').classList.remove('time-up');
   renderScoreBand();
   S.roundPts = 0;
+  S.timeUp = false;
+  _endingRound = false;
   S.currentCards = [];
   S.roundStartedAt = Date.now();
 
@@ -2602,6 +2640,10 @@ function buildCard(idx, diff, word) {
   card.setAttribute('aria-label', t.reveal);
   const reveal = () => {
     if (card.classList.contains('revealed')) return;
+    if (S.timeUp) {
+      toast(UI[S.lang].timeUpLocked);
+      return;
+    }
     card.classList.remove('unrevealed');
     card.classList.add('revealed','pop');
     card.removeAttribute('role');
@@ -2626,6 +2668,10 @@ function buildCard(idx, diff, word) {
 function markCard(idx, status) {
   const c = S.currentCards[idx];
   if (!c || c.status) return;
+  if (S.timeUp) {
+    toast(UI[S.lang].timeUpLocked);
+    return;
+  }
   c.status = status;
   const card = document.getElementById(`card_${idx}`);
   const t = UI[S.lang];
@@ -2647,6 +2693,10 @@ function markCard(idx, status) {
 function passCard(idx) {
   const c = S.currentCards[idx];
   if (!c || c.status) return;
+  if (S.timeUp) {
+    toast(UI[S.lang].timeUpLocked);
+    return;
+  }
   // Bara räkna pass och straffa om kortet faktiskt har visats för förklararen.
   // Annars förorenas pass-statistiken av "byte innan visat".
   const wasRevealed = Boolean(c.revealedAt) && c.word !== EXHAUSTED;
@@ -2674,7 +2724,12 @@ function passCard(idx) {
 // ═══════════════════════════════════════════
 //  ROUND END
 // ═══════════════════════════════════════════
+let _endingRound = false;
 function endRound() {
+  if (_endingRound) return;
+  _endingRound = true;
+  const btn = document.getElementById('nextBtn');
+  if (btn) btn.disabled = true;
   clearInterval(S.timerTick);
   const player = S.players[S.idx];
   const pts = S.roundPts;
@@ -2740,6 +2795,7 @@ function closeRoundModal() {
 function startTimer() {
   clearInterval(S.timerTick);
   const wrap = document.getElementById('timerWrap');
+  wrap.classList.remove('time-up');
   if (!S.timerOn) { wrap.classList.remove('visible'); return; }
   wrap.classList.add('visible');
   // Räkna från epoch-tid istället för att dekrementera varje sekund.
@@ -2776,7 +2832,14 @@ function updateTimer() {
 }
 
 function onTimeUp() {
+  if (S.timeUp) return;
+  S.timeUp = true;
   const el = document.getElementById('timerNum');
+  const wrap = document.getElementById('timerWrap');
+  const btn = document.getElementById('nextBtn');
+  wrap.classList.add('time-up');
+  btn.textContent = UI[S.lang].timeUpEndBtn;
+  btn.classList.add('time-up');
   el.classList.add('shake');
   setTimeout(() => el.classList.remove('shake'), 450);
   toast(UI[S.lang].timeUp);
@@ -3226,6 +3289,7 @@ async function mpCloudPost(action, extra = {}) {
     sv.used_words = mergeUsedWords(sv.used_words, extra.used_words);
     sv.rich_stats = mergeRichStats(sv.rich_stats, extra.rich_stats);
   } else if (action === 'start_round') {
+    if (sv.phase !== 'waiting_for_round') return { ok: true, state: sv };
     sv.phase = 'playing';
     sv.round_pts = 0;
     sv.timer_started_at = sv.timer_on ? new Date().toISOString() : null;
@@ -3248,6 +3312,7 @@ async function mpCloudPost(action, extra = {}) {
   } else if (action === 'clear_stats') {
     sv.rich_stats = { players: {}, guests: [] };
   } else if (action === 'end_round') {
+    if (sv.phase !== 'playing') return { ok: true, state: sv };
     const player = sv.players[sv.idx];
     const pts = extra.round_pts || 0;
     sv.scores = { ...(sv.scores || {}), [player]: ((sv.scores || {})[player] || 0) + pts };
@@ -3256,6 +3321,7 @@ async function mpCloudPost(action, extra = {}) {
     sv.phase = 'round_summary';
     sv.timer_started_at = null;
   } else if (action === 'next_player') {
+    if (sv.phase !== 'round_summary') return { ok: true, state: sv };
     sv.idx = (sv.idx + 1) % sv.players.length;
     sv.phase = 'waiting_for_round';
     sv.round_pts = 0;
@@ -3609,7 +3675,13 @@ function mpShowWaiting(sv, isActive) {
   showScreen('waitingScreen');
 }
 
-async function mpBeginRound() { await mpPost('start_round'); }
+let _beginningRound = false;
+async function mpBeginRound() {
+  if (_beginningRound) return;
+  _beginningRound = true;
+  try { await mpPost('start_round'); }
+  finally { _beginningRound = false; }
+}
 
 function showScoreNotif(event, lang) {
   const l = lang || 'sv';
@@ -3685,6 +3757,7 @@ applyLangUI();
 syncAlvaSettings();
 renderPresets();
 renderDeviceChip();
+checkSession();
 mpSubscribe();
 
 // Pausa polling i bakgrundsflik för att spara batteri och Supabase-quota.
