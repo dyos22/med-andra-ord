@@ -1,0 +1,31 @@
+name: Keep Supabase alive
+
+# Pingar Supabase-projektet 'med-andra-ord' (ID lwzzmtrslerbhwitpqlf) regelbundet
+# så att det inte pausas pga 7 dagars inaktivitet. Mån + tors ger 3–4 dagars
+# mellanrum, god marginal mot 7-dagarsgränsen.
+#
+# Nyckeln nedan är samma publishable-nyckel som redan finns i index.html;
+# den är avsedd att exponeras publikt och skyddas av Supabase RLS.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1,4'  # 06:00 UTC måndag och torsdag
+  workflow_dispatch:        # tillåt manuell körning för verifiering
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping mao_rooms
+        run: |
+          set -euo pipefail
+          URL="https://lwzzmtrslerbhwitpqlf.supabase.co/rest/v1/mao_rooms?select=room_code&limit=1"
+          KEY="sb_publishable_56qru2-bdw6-9I6LKCSWtg_674Uq54p"
+          STATUS=$(curl -sS -o /tmp/body -w "%{http_code}" \
+            -H "apikey: $KEY" \
+            -H "Authorization: Bearer $KEY" \
+            "$URL")
+          echo "HTTP $STATUS"
+          cat /tmp/body
+          echo
+          test "$STATUS" = "200"
