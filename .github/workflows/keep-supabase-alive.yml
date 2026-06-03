@@ -1,16 +1,17 @@
 name: Keep Supabase alive
 
 # Pingar Supabase-projektet 'med-andra-ord' (ID lwzzmtrslerbhwitpqlf) regelbundet
-# så att det inte pausas pga 7 dagars inaktivitet. Mån + tors ger 3–4 dagars
-# mellanrum, god marginal mot 7-dagarsgränsen.
+# så att det inte pausas pga 7 dagars inaktivitet. Körs DAGLIGEN: även om GitHub
+# råkar hoppa över eller fördröja flera körningar i rad ligger vi med stor marginal
+# under 7-dagarsgränsen.
 #
 # Nyckeln nedan är samma publishable-nyckel som redan finns i index.html;
 # den är avsedd att exponeras publikt och skyddas av Supabase RLS.
 
 on:
   schedule:
-    - cron: '0 6 * * 1,4'  # 06:00 UTC måndag och torsdag
-  workflow_dispatch:        # tillåt manuell körning för verifiering
+    - cron: '17 5 * * *'  # 05:17 UTC varje dag (avrundad minut undviks med flit)
+  workflow_dispatch:       # tillåt manuell körning för verifiering
 
 jobs:
   ping:
