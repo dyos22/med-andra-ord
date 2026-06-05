@@ -55,6 +55,12 @@ globalThis.MAO_WORDLIST_META = {
         "medium": 317,
         "hard": 310,
         "barn": 56
+      },
+      "musik": {
+        "easy": 16,
+        "medium": 27,
+        "hard": 21,
+        "barn": 8
       }
     },
     "en": {
@@ -105,9 +111,16 @@ globalThis.MAO_WORDLIST_META = {
         "medium": 317,
         "hard": 310,
         "barn": 56
+      },
+      "musik": {
+        "easy": 16,
+        "medium": 23,
+        "hard": 20,
+        "barn": 8
       }
     }
-  }
+  },
+  "note": "Curated-teman (personer/meningar/musik) senast uppdaterade via update-curated-in-generated.mjs"
 };
 globalThis.MAO_GENERATED_WORDS = {
   "sv": {
@@ -4251,6 +4264,88 @@ globalThis.MAO_GENERATED_WORDS = {
         "Dory",
         "Shrek",
         "Donkey"
+      ]
+    },
+    "musik": {
+      "easy": [
+        "låt",
+        "sång",
+        "not",
+        "ton",
+        "rytm",
+        "melodi",
+        "trumma",
+        "gitarr",
+        "piano",
+        "fiol",
+        "flöjt",
+        "bas",
+        "mikrofon",
+        "pop",
+        "rock",
+        "jazz"
+      ],
+      "medium": [
+        "musiker",
+        "sångare",
+        "dirigent",
+        "kompositör",
+        "orkester",
+        "klarinett",
+        "trumpet",
+        "trombon",
+        "saxofon",
+        "violin",
+        "cello",
+        "kontrabas",
+        "tuba",
+        "ackord",
+        "takt",
+        "tempo",
+        "tonart",
+        "harmoni",
+        "refräng",
+        "vers",
+        "skala",
+        "ballad",
+        "opera",
+        "solist",
+        "kvartett",
+        "slagverk",
+        "symfoni"
+      ],
+      "hard": [
+        "fagott",
+        "oboe",
+        "valthorn",
+        "cembalo",
+        "klaviatur",
+        "marimba",
+        "xylofon",
+        "fuga",
+        "kadens",
+        "legato",
+        "vibrato",
+        "crescendo",
+        "diminuendo",
+        "allegro",
+        "largo",
+        "aria",
+        "dynamik",
+        "ensemble",
+        "partitur",
+        "marschorkester",
+        "stränginstrument"
+      ],
+      "barn": [
+        "trumma",
+        "gitarr",
+        "piano",
+        "flöjt",
+        "fiol",
+        "sång",
+        "not",
+        "mikrofon"
       ]
     }
   },
@@ -8431,6 +8526,83 @@ globalThis.MAO_GENERATED_WORDS = {
         "Dory",
         "Shrek",
         "Donkey"
+      ]
+    },
+    "musik": {
+      "easy": [
+        "song",
+        "note",
+        "tone",
+        "rhythm",
+        "melody",
+        "drum",
+        "guitar",
+        "piano",
+        "violin",
+        "flute",
+        "bass",
+        "microphone",
+        "pop",
+        "rock",
+        "jazz",
+        "tune"
+      ],
+      "medium": [
+        "musician",
+        "singer",
+        "conductor",
+        "composer",
+        "orchestra",
+        "clarinet",
+        "trumpet",
+        "trombone",
+        "saxophone",
+        "cello",
+        "tuba",
+        "chord",
+        "tempo",
+        "harmony",
+        "chorus",
+        "verse",
+        "scale",
+        "ballad",
+        "opera",
+        "soloist",
+        "quartet",
+        "percussion",
+        "symphony"
+      ],
+      "hard": [
+        "bassoon",
+        "oboe",
+        "harpsichord",
+        "keyboard",
+        "marimba",
+        "xylophone",
+        "fugue",
+        "cadence",
+        "legato",
+        "vibrato",
+        "crescendo",
+        "diminuendo",
+        "allegro",
+        "largo",
+        "aria",
+        "dynamics",
+        "ensemble",
+        "baton",
+        "resonance",
+        "score"
+      ],
+      "barn": [
+        "drum",
+        "guitar",
+        "piano",
+        "flute",
+        "violin",
+        "song",
+        "microphone",
+        "note"
       ]
     }
   }
