@@ -17,31 +17,31 @@ globalThis.MAO_WORDLIST_META = {
       "djur": {
         "easy": 48,
         "medium": 36,
-        "hard": 5,
+        "hard": 25,
         "barn": 43
       },
       "mat": {
         "easy": 47,
-        "medium": 22,
-        "hard": 5,
+        "medium": 36,
+        "hard": 23,
         "barn": 30
       },
       "sport": {
         "easy": 43,
-        "medium": 24,
-        "hard": 8,
+        "medium": 38,
+        "hard": 26,
         "barn": 37
       },
       "natur": {
         "easy": 46,
         "medium": 38,
-        "hard": 9,
+        "hard": 26,
         "barn": 41
       },
       "yrken": {
         "easy": 46,
-        "medium": 18,
-        "hard": 1,
+        "medium": 33,
+        "hard": 18,
         "barn": 37
       },
       "meningar": {
@@ -57,10 +57,10 @@ globalThis.MAO_WORDLIST_META = {
         "barn": 56
       },
       "musik": {
-        "easy": 16,
+        "easy": 26,
         "medium": 27,
         "hard": 21,
-        "barn": 8
+        "barn": 13
       }
     },
     "en": {
@@ -120,7 +120,7 @@ globalThis.MAO_WORDLIST_META = {
       }
     }
   },
-  "note": "Curated-teman (personer/meningar/musik) senast uppdaterade via update-curated-in-generated.mjs"
+  "note": "Curated-teman + tilläggs-overlay senast uppdaterade via update-curated-in-generated.mjs"
 };
 globalThis.MAO_GENERATED_WORDS = {
   "sv": {
@@ -2685,7 +2685,27 @@ globalThis.MAO_GENERATED_WORDS = {
         "serval",
         "oryx",
         "kasuar",
-        "kiwi"
+        "kiwi",
+        "myrslok",
+        "vessla",
+        "järv",
+        "lämmel",
+        "tapir",
+        "näbbmus",
+        "mårdhund",
+        "hermelin",
+        "utter",
+        "lodjur",
+        "mullvad",
+        "åkersork",
+        "salamander",
+        "sengångare",
+        "bältdjur",
+        "pungråtta",
+        "vårtsvin",
+        "manet",
+        "bläckfisk",
+        "fladdermus"
       ],
       "barn": [
         "haj",
@@ -2805,14 +2825,46 @@ globalThis.MAO_GENERATED_WORDS = {
         "matcha",
         "espresso",
         "latte",
-        "cappuccino"
+        "cappuccino",
+        "broccoli",
+        "blomkål",
+        "paprika",
+        "zucchini",
+        "aubergine",
+        "oliv",
+        "omelett",
+        "gryta",
+        "köttbulle",
+        "korv",
+        "sallad",
+        "makaroner",
+        "pannkaka",
+        "ostbricka"
       ],
       "hard": [
         "bouillabaisse",
         "saltimbocca",
         "emulgering",
         "fermentering",
-        "emulsion"
+        "emulsion",
+        "surströmming",
+        "palsternacka",
+        "kålrot",
+        "kassler",
+        "blodpudding",
+        "isterband",
+        "kalvbräss",
+        "kronärtskocka",
+        "fänkål",
+        "mangold",
+        "rödbeta",
+        "quinoa",
+        "bulgur",
+        "polenta",
+        "saffran",
+        "kardemumma",
+        "dragon",
+        "körvel"
       ],
       "barn": [
         "pizza",
@@ -2917,7 +2969,21 @@ globalThis.MAO_GENERATED_WORDS = {
         "tyngdlyftning",
         "sambo",
         "aikido",
-        "sumo"
+        "sumo",
+        "innebandy",
+        "handboll",
+        "gymnastik",
+        "simning",
+        "badminton",
+        "volleyboll",
+        "friidrott",
+        "brottning",
+        "bordtennis",
+        "golf",
+        "segling",
+        "klättring",
+        "ridning",
+        "boxning"
       ],
       "hard": [
         "häcklöpning",
@@ -2927,7 +2993,25 @@ globalThis.MAO_GENERATED_WORDS = {
         "ergometer",
         "periodisering",
         "scratch",
-        "libero"
+        "libero",
+        "curling",
+        "rodd",
+        "fäktning",
+        "skeleton",
+        "vattenpolo",
+        "squash",
+        "rugby",
+        "kricket",
+        "biljard",
+        "tyngdlyftning",
+        "skidskytte",
+        "backhoppning",
+        "störtlopp",
+        "landhockey",
+        "softboll",
+        "triathlon",
+        "bob",
+        "rinkbandy"
       ],
       "barn": [
         "fotboll",
@@ -3067,7 +3151,24 @@ globalThis.MAO_GENERATED_WORDS = {
         "daggpunkt",
         "mykorrhiza",
         "saprofyt",
-        "epifyt"
+        "epifyt",
+        "tundra",
+        "glaciär",
+        "vulkan",
+        "myr",
+        "rev",
+        "klyfta",
+        "lavin",
+        "ravin",
+        "fjord",
+        "atoll",
+        "savann",
+        "oas",
+        "geysir",
+        "stalaktit",
+        "sanddyn",
+        "tajga",
+        "stäpp"
       ],
       "barn": [
         "vulkan",
@@ -3180,10 +3281,42 @@ globalThis.MAO_GENERATED_WORDS = {
         "lingvist",
         "numismatiker",
         "heraldiker",
-        "genealog"
+        "genealog",
+        "elektriker",
+        "frisör",
+        "snickare",
+        "brevbärare",
+        "rörmokare",
+        "murare",
+        "målare",
+        "kassör",
+        "servitör",
+        "vaktmästare",
+        "trädgårdsmästare",
+        "hantverkare",
+        "mekaniker",
+        "svetsare",
+        "bagare"
       ],
       "hard": [
-        "aktuarie"
+        "aktuarie",
+        "sotare",
+        "hovslagare",
+        "urmakare",
+        "glasblåsare",
+        "logoped",
+        "optiker",
+        "takläggare",
+        "plåtslagare",
+        "smed",
+        "tunnbindare",
+        "sadelmakare",
+        "arborist",
+        "sömmerska",
+        "skomakare",
+        "korgmakare",
+        "agronom",
+        "geolog"
       ],
       "barn": [
         "astronaut",
@@ -4283,7 +4416,17 @@ globalThis.MAO_GENERATED_WORDS = {
         "mikrofon",
         "pop",
         "rock",
-        "jazz"
+        "jazz",
+        "band",
+        "konsert",
+        "scen",
+        "ljud",
+        "kör",
+        "högtalare",
+        "hörlurar",
+        "munspel",
+        "triangel",
+        "tamburin"
       ],
       "medium": [
         "musiker",
@@ -4345,7 +4488,12 @@ globalThis.MAO_GENERATED_WORDS = {
         "fiol",
         "sång",
         "not",
-        "mikrofon"
+        "mikrofon",
+        "visa",
+        "maracas",
+        "blockflöjt",
+        "sjunga",
+        "dansa"
       ]
     }
   },

@@ -359,6 +359,21 @@ function writeOutput(words) {
   console.log(JSON.stringify(meta.counts, null, 2));
 }
 
+function mergeExtraWords(words) {
+  const file = path.join(CURATED_DIR, 'extra-words.json');
+  if (!fs.existsSync(file)) return;
+  const extra = JSON.parse(fs.readFileSync(file, 'utf8'));
+  for (const lang of ['sv', 'en']) {
+    for (const [theme, diffs] of Object.entries(extra[lang] || {})) {
+      words[lang][theme] ||= {};
+      for (const [diff, list] of Object.entries(diffs)) {
+        words[lang][theme][diff] = uniq([...(words[lang][theme][diff] || []), ...list], lang);
+      }
+    }
+  }
+  console.log('Tilläggs-overlay (extra-words.json) sammanfogad.');
+}
+
 ensureDir(CACHE);
 const current = extractCurrentWords();
 const curated = readCurated();
@@ -368,4 +383,6 @@ const scowlRows = readScowl();
 console.log(`SALDO-kandidater: ${saldo.size}`);
 console.log(`Flex-kandidater: ${flexRows.length}`);
 console.log(`SCOWL-kandidater: ${scowlRows.length}`);
-writeOutput(buildGenerated(current, curated, saldo, flexRows, scowlRows));
+const built = buildGenerated(current, curated, saldo, flexRows, scowlRows);
+mergeExtraWords(built);
+writeOutput(built);

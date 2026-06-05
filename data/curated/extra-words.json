@@ -1,0 +1,26 @@
+{
+  "sv": {
+    "djur": {
+      "hard": ["myrslok", "vessla", "järv", "lämmel", "tapir", "näbbmus", "mårdhund", "hermelin", "utter", "lodjur", "mullvad", "åkersork", "salamander", "sengångare", "bältdjur", "pungråtta", "vårtsvin", "manet", "bläckfisk", "fladdermus"]
+    },
+    "mat": {
+      "medium": ["broccoli", "blomkål", "paprika", "zucchini", "aubergine", "oliv", "lasagne", "omelett", "gryta", "köttbulle", "korv", "sallad", "makaroner", "pannkaka", "ostbricka"],
+      "hard": ["surströmming", "palsternacka", "kålrot", "kassler", "blodpudding", "isterband", "kalvbräss", "kronärtskocka", "fänkål", "mangold", "rödbeta", "quinoa", "bulgur", "polenta", "saffran", "kardemumma", "dragon", "körvel"]
+    },
+    "sport": {
+      "medium": ["innebandy", "handboll", "gymnastik", "simning", "badminton", "ishockey", "volleyboll", "friidrott", "brottning", "bordtennis", "golf", "segling", "klättring", "ridning", "boxning"],
+      "hard": ["curling", "rodd", "fäktning", "skeleton", "vattenpolo", "squash", "rugby", "kricket", "biljard", "tyngdlyftning", "skidskytte", "backhoppning", "störtlopp", "landhockey", "softboll", "triathlon", "bob", "rinkbandy"]
+    },
+    "natur": {
+      "hard": ["tundra", "glaciär", "vulkan", "myr", "rev", "klyfta", "lavin", "ravin", "fjord", "atoll", "savann", "oas", "geysir", "stalaktit", "sanddyn", "permafrost", "tajga", "stäpp"]
+    },
+    "yrken": {
+      "medium": ["elektriker", "frisör", "snickare", "brevbärare", "rörmokare", "murare", "målare", "kassör", "servitör", "vaktmästare", "trädgårdsmästare", "hantverkare", "mekaniker", "svetsare", "bagare"],
+      "hard": ["sotare", "hovslagare", "urmakare", "glasblåsare", "logoped", "optiker", "takläggare", "plåtslagare", "smed", "tunnbindare", "sadelmakare", "arborist", "aktuarie", "sömmerska", "skomakare", "korgmakare", "agronom", "geolog"]
+    },
+    "musik": {
+      "easy": ["band", "konsert", "scen", "ljud", "kör", "högtalare", "hörlurar", "munspel", "triangel", "tamburin"],
+      "barn": ["visa", "maracas", "blockflöjt", "sjunga", "dansa"]
+    }
+  }
+}
