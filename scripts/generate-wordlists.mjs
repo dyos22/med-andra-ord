@@ -15,7 +15,10 @@ const SOURCES = {
   scowl2020: 'https://downloads.sourceforge.net/project/wordlist/SCOWL/2020.12.07/scowl-2020.12.07.tar.gz',
 };
 
-const THEMES = ['standard', 'djur', 'mat', 'sport', 'natur', 'yrken', 'musik', 'meningar', 'personer'];
+const THEMES = ['standard', 'djur', 'mat', 'sport', 'natur', 'yrken', 'musik', 'meningar', 'personer', 'lotr'];
+// Teman som helt och hållet kommer från data/curated (egennamn/fraser som inte
+// finns i de generella ordkorpusarna och därför inte ska valideras mot dem).
+const CURATED_THEMES = ['personer', 'meningar', 'musik', 'lotr'];
 const DIFFS = ['easy', 'medium', 'hard', 'barn'];
 const STANDARD_LIMITS = { easy: 650, medium: 750, hard: 750, barn: 320 };
 
@@ -264,7 +267,7 @@ function filterSeedList(words, lang, validator, allowPhrase = false) {
 
 function validateCurated(curated) {
   for (const lang of ['sv', 'en']) {
-    for (const theme of ['personer', 'meningar', 'musik']) {
+    for (const theme of CURATED_THEMES) {
       for (const diff of DIFFS) {
         const list = curated[lang]?.[theme]?.[diff];
         if (!Array.isArray(list) || !list.length) {
@@ -287,7 +290,7 @@ function buildGenerated(current, curated, saldo, flexRows, scowlRows) {
     out.sv[theme] = {};
     out.en[theme] = {};
     for (const diff of DIFFS) {
-      const allowPhrase = theme === 'meningar' || theme === 'personer';
+      const allowPhrase = theme === 'meningar' || theme === 'personer' || theme === 'lotr';
       out.sv[theme][diff] = filterSeedList(current.WORDS.sv[theme]?.[diff] || [], 'sv', (w, p) => validSv(w, saldo, p) || allowPhrase, allowPhrase);
       out.en[theme][diff] = filterSeedList(current.WORDS.en[theme]?.[diff] || [], 'en', (w, p) => validEn(w, scowlSet, p) || allowPhrase, allowPhrase);
     }
@@ -295,7 +298,7 @@ function buildGenerated(current, curated, saldo, flexRows, scowlRows) {
 
   validateCurated(curated);
   for (const lang of ['sv', 'en']) {
-    for (const theme of ['personer', 'meningar', 'musik']) {
+    for (const theme of CURATED_THEMES) {
       for (const diff of DIFFS) {
         out[lang][theme][diff] = curated[lang][theme][diff];
       }
