@@ -32,7 +32,7 @@ for (const [theme, diffs] of Object.entries(words.en)) {
     for (const word of list) {
       const key = String(word).trim().toLowerCase();
       if (EN_FALSE_FRIENDS.has(key)) issues.push(`en.${theme}.${diff}: "${word}" ser svenskt ut`);
-      if (theme !== 'personer' && /[åäö]/i.test(key)) {
+      if (theme !== 'personer' && theme !== 'lotr' && /[åäö]/i.test(key)) {
         issues.push(`en.${theme}.${diff}: "${word}" innehåller svensk bokstav`);
       }
     }
