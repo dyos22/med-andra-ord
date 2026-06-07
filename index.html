@@ -1206,7 +1206,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="words.generated.js"></script>
+<script src="words.generated.js?v=20260607-lotr"></script>
 <script>
 // ═══════════════════════════════════════════
 //  SHARED PERSONS DATA (language-independent)
@@ -1316,7 +1316,7 @@ const PERSONS_DATA = {
 // ═══════════════════════════════════════════
 //  WORD LISTS
 // ═══════════════════════════════════════════
-const WORDS = globalThis.MAO_GENERATED_WORDS || {
+const FALLBACK_WORDS = {
   sv: {
     standard: {
       easy: [
@@ -1825,6 +1825,32 @@ const WORDS = globalThis.MAO_GENERATED_WORDS || {
     },
   },
 };
+
+// Slå ihop den genererade ordlistan med den inbäddade reservlistan. Den
+// genererade datan vinner där den finns, men reservlistan fyller i teman/
+// svårigheter som saknas – t.ex. om webbläsaren råkar ha en cachad äldre
+// words.generated.js utan ett nyligen tillagt tema. Då faller vi inte tyst
+// tillbaka på "Blandat" utan använder reservlistans ord för det temat.
+function mergeWordLists(fallback, generated) {
+  if (!generated) return fallback;
+  const out = {};
+  for (const lang of Object.keys(fallback)) {
+    out[lang] = { ...(generated[lang] || {}) };
+    for (const theme of Object.keys(fallback[lang])) {
+      const gen = generated[lang]?.[theme];
+      if (!gen) { out[lang][theme] = fallback[lang][theme]; continue; }
+      const merged = { ...gen };
+      for (const diff of Object.keys(fallback[lang][theme])) {
+        if (!Array.isArray(merged[diff]) || !merged[diff].length) {
+          merged[diff] = fallback[lang][theme][diff];
+        }
+      }
+      out[lang][theme] = merged;
+    }
+  }
+  return out;
+}
+const WORDS = mergeWordLists(FALLBACK_WORDS, globalThis.MAO_GENERATED_WORDS);
 
 // ═══════════════════════════════════════════
 //  THEMES CONFIG
